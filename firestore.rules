@@ -1,0 +1,104 @@
+rules_version = '2';
+
+// Visit Jaisalmer — Firestore security rules.
+//
+//   {dataset}/{uid}         admin working copies (drafts). Admins only.
+//   published/{dataset}     what the website shows. Public read, admin write.
+//   admins/{email}          admin allow-list. Managed by scripts/seed.mjs or the console.
+//   serviceSubmissions/*    "Add Your Service" form. Public create (validated), admin read/manage.
+//   newsletter/{email}      newsletter signups. Public create (validated), admin read/manage.
+//   reviews/{id}            visitor ratings of service providers. Public create (validated, always
+//                           "pending"), admin read/moderate. Approved ones are summarised by the admin
+//                           into published/reviews, which is what the website reads.
+//
+// Keep CONTENT in sync with CONTENT_KEYS in public/assets/js/firebase-config.*.js.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function contentKeys() {
+      return ['places', 'landmarks', 'activities', 'transport', 'operators', 'experiences',
+              'sponsors', 'houseAds', 'partners', 'historyAudio', 'guidance', 'settings', 'announcements',
+              'itineraries'];
+    }
+    function signedIn() { return request.auth != null; }
+    function verifiedEmail() {
+      return signedIn() && request.auth.token.email is string && request.auth.token.email_verified == true;
+    }
+    function isAdmin() {
+      return verifiedEmail()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.token.email.lower()));
+    }
+    function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+
+    // ---------- admins ----------
+    match /admins/{email} {
+      // A signed-in user may check whether they themselves are an admin.
+      allow get: if verifiedEmail() && email == request.auth.token.email.lower();
+      allow list: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---------- published snapshots (the website reads these) ----------
+    match /published/{key} {
+      // Whole-collection read is safe: only content keys can ever be written here,
+      // and it lets the website fetch every dataset in one query.
+      allow read: if true;
+      allow write: if isAdmin() && (key in contentKeys() || key == 'reviews')
+        && request.resource.data.items is list
+        && request.resource.data.count == request.resource.data.items.size();
+    }
+
+    // ---------- admin working copies ----------
+    match /{key}/{uid} {
+      allow read, delete: if isAdmin() && key in contentKeys();
+      allow create, update: if isAdmin() && key in contentKeys()
+        && request.resource.data._uid == uid
+        && request.resource.data._published is bool;
+    }
+
+    // ---------- Add Your Service submissions ----------
+    match /serviceSubmissions/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'serviceType', 'mobile', 'description', 'status', 'createdAt', 'source'])
+        && request.resource.data.keys().hasAll(['name', 'serviceType', 'mobile', 'description', 'status', 'createdAt'])
+        && str(request.resource.data.name, 1, 80)
+        && request.resource.data.serviceType in ['Local Guide', 'Photographer', 'Taxi Driver', 'Auto Driver',
+             'Camel Safari Provider', 'Jeep Safari Provider', 'Bike/Scooty Rental', 'Car Rental',
+             'Airport / Desert Transfer', 'Local Tour Operator', 'Activity Provider', 'Other tourism-related service']
+        && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
+        && str(request.resource.data.description, 1, 1000)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && (!('source' in request.resource.data) || str(request.resource.data.source, 0, 40));
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ---------- visitor reviews of service providers (moderated before they show) ----------
+    match /reviews/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['targetType', 'targetId', 'targetName', 'rating', 'text', 'name', 'status', 'createdAt', 'source'])
+        && request.resource.data.keys().hasAll(['targetType', 'targetId', 'targetName', 'rating', 'status', 'createdAt'])
+        && request.resource.data.targetType in ['transport', 'operator']
+        && request.resource.data.targetId is string && request.resource.data.targetId.matches('^[A-Za-z0-9][A-Za-z0-9_.-]{0,80}$')
+        && str(request.resource.data.targetName, 1, 120)
+        && request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && (!('text' in request.resource.data) || str(request.resource.data.text, 1, 600))
+        && (!('name' in request.resource.data) || str(request.resource.data.name, 1, 60))
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && (!('source' in request.resource.data) || str(request.resource.data.source, 0, 40));
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ---------- newsletter (document ID = lowercased email, so each address is stored once) ----------
+    match /newsletter/{email} {
+      allow create: if request.resource.data.keys().hasOnly(['email', 'createdAt', 'source'])
+        && request.resource.data.email == email
+        && email == email.lower()
+        && email.size() <= 254
+        && email.matches('^[^\\s@<>"]+@[^\\s@<>"]+\\.[a-z0-9-]{2,}$')
+        && request.resource.data.createdAt == request.time
+        && (!('source' in request.resource.data) || str(request.resource.data.source, 0, 40));
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

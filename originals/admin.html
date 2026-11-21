@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Visit Jaisalmer Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sandstone sidebar of datasets on the left, a working table in the middle, an edit drawer sliding in from the right.
+   Colours and type follow the Visit Jaisalmer site (desert charcoal, ivory, sandstone copper, muted gold). */
+:root{
+  --bg:#F5EBD7; --panel:#FBF6EC; --sunk:#EDE0C8; --ink:#1E2523; --ink-2:#5E5A51; --line:rgba(23,43,42,.14); --line-2:rgba(23,43,42,.26);
+  --charcoal:#172B2A; --on-charcoal:#F7F1E5; --copper:#A86330; --copper-ink:#8F512A; --gold:#C9A45C;
+  --ok:#2F6B4F; --ok-bg:rgba(47,107,79,.12); --warn:#8A5D14; --warn-bg:rgba(201,150,60,.18); --err:#A8443F; --err-bg:rgba(168,68,63,.12);
+  --info:#3F6F7A; --info-bg:rgba(63,111,122,.12); --scrim:rgba(12,24,23,.5);
+  --f-display:'Playfair Display',Georgia,serif; --f-body:'Inter',-apple-system,'Segoe UI',sans-serif; --f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111D1C; --panel:#172726; --sunk:#0D1716; --ink:#EDE6D8; --ink-2:#A9A293; --line:rgba(237,230,216,.12); --line-2:rgba(237,230,216,.24);
+  --charcoal:#0A1413; --on-charcoal:#F7F1E5; --copper:#C98A55; --copper-ink:#E0A574; --gold:#D8B672;
+  --ok:#8FC7A8; --ok-bg:rgba(143,199,168,.14); --warn:#EDCB8A; --warn-bg:rgba(237,203,138,.14); --err:#F0A99F; --err-bg:rgba(240,169,159,.14);
+  --info:#9CC9D3; --info-bg:rgba(156,201,211,.14); --scrim:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111D1C; --panel:#172726; --sunk:#0D1716; --ink:#EDE6D8; --ink-2:#A9A293; --line:rgba(237,230,216,.12); --line-2:rgba(237,230,216,.24);
+  --charcoal:#0A1413; --on-charcoal:#F7F1E5; --copper:#C98A55; --copper-ink:#E0A574; --gold:#D8B672;
+  --ok:#8FC7A8; --ok-bg:rgba(143,199,168,.14); --warn:#EDCB8A; --warn-bg:rgba(237,203,138,.14); --err:#F0A99F; --err-bg:rgba(240,169,159,.14);
+  --info:#9CC9D3; --info-bg:rgba(156,201,211,.14); --scrim:rgba(0,0,0,.6); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--copper);outline-offset:2px;border-radius:4px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.app{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100%}
+/* sidebar */
+.side{background:var(--charcoal);color:var(--on-charcoal);padding:20px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;overflow:auto}
+.brand{display:flex;flex-direction:column;line-height:1;padding:0 8px}
+.brand small{font-family:var(--f-display);font-size:.8rem;letter-spacing:.06em;opacity:.7}
+.brand b{font-family:var(--f-display);font-size:1.45rem;color:var(--gold)}
+.brand span{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-top:6px}
+.nav{display:flex;flex-direction:column;gap:14px}
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-label{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;opacity:.55;padding:0 10px 4px}
+.nav button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;color:inherit;font-size:.9rem;font-weight:500}
+.nav button:hover{background:rgba(247,241,229,.07)}
+.nav button[aria-current="page"]{background:rgba(201,164,92,.16);color:#F7D77A}
+.nav .cnt{font:500 .72rem var(--f-mono);opacity:.7;font-variant-numeric:tabular-nums}
+.nav .dot{width:7px;height:7px;border-radius:50%;background:#F0A99F;flex:none}
+.side-foot{margin-top:auto;font-size:.75rem;opacity:.65;padding:0 10px;line-height:1.45}
+/* main */
+.main{min-width:0;padding-inline:clamp(16px,3vw,36px);padding-block:20px 60px;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top h1{font-family:var(--f-display);font-size:clamp(1.4rem,2.6vw,1.9rem);font-weight:700}
+.top .sub{color:var(--ink-2);font-size:.9rem;margin-top:2px}
+.top-end{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--sunk);color:var(--ink-2)}
+.sync::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.sync.ok{color:var(--ok);background:var(--ok-bg)} .sync.warn{color:var(--warn);background:var(--warn-bg)} .sync.err{color:var(--err);background:var(--err-bg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:.86rem;white-space:nowrap}
+.btn:hover{border-color:var(--copper)}
+.btn.primary{background:var(--charcoal);border-color:var(--charcoal);color:var(--on-charcoal)}
+:root[data-theme="dark"] .btn.primary{background:var(--copper);border-color:var(--copper);color:#1A120B}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{background:var(--copper);border-color:var(--copper);color:#1A120B}}
+.btn.danger{color:var(--err);border-color:var(--err)}
+.btn.ghost{background:none;border-color:transparent;color:var(--copper-ink)}
+.btn.sm{min-height:32px;padding:0 10px;font-size:.8rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:var(--r);font-size:.86rem;border:1px solid}
+.banner.warn{background:var(--warn-bg);border-color:transparent;color:var(--ink)}
+.banner.info{background:var(--info-bg);border-color:transparent}
+.banner b{display:block}
+/* dashboard */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;text-align:left;display:flex;flex-direction:column;gap:2px}
+button.tile:hover{border-color:var(--copper)}
+.tile .k{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.tile .v{font:600 1.7rem/1.2 var(--f-display);font-variant-numeric:tabular-nums}
+.tile .s{font-size:.78rem;color:var(--ink-2)}
+.sec-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sec-h h2{font-family:var(--f-display);font-size:1.15rem}
+.sec-h p{margin:0;color:var(--ink-2);font-size:.85rem}
+.issues{list-style:none;margin:0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.issues li+li{border-top:1px solid var(--line)}
+.issues button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:10px 14px}
+.issues button:hover{background:var(--sunk)}
+.issues .ds{font-size:.75rem;color:var(--ink-2);white-space:nowrap}
+.issues .t{min-width:0}.issues .t b{font-weight:600}.issues .t span{color:var(--ink-2)}
+.empty-note{padding:16px;color:var(--ink-2);font-size:.88rem}
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;background:var(--sunk);color:var(--ink-2)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.err{background:var(--err-bg);color:var(--err)} .pill.info{background:var(--info-bg);color:var(--info)}
+/* list */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:0 10px;min-height:38px}
+.search input{border:0;background:none;outline:none;width:100%;min-width:0}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.seg button{background:var(--panel);border:0;padding:0 12px;min-height:36px;font-size:.8rem;font-weight:600;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button[aria-pressed="true"]{background:var(--charcoal);color:var(--on-charcoal)}
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th{text-align:left;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--sunk)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--sunk)}
+td.name b{font-weight:600;display:block}
+td.name span{color:var(--ink-2);font-size:.8rem}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.8rem;white-space:nowrap}
+td .pills{display:flex;gap:4px;flex-wrap:wrap}
+.mono{font-family:var(--f-mono);font-size:.78rem}
+.ds-foot{display:flex;gap:12px;align-items:center;flex-wrap:wrap;color:var(--ink-2);font-size:.8rem}
+/* drawer */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--panel);z-index:41;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(0,0,0,.18);padding-top:env(safe-area-inset-top,0px)}
+.dr-head{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--line)}
+.dr-head h2{font-family:var(--f-display);font-size:1.25rem}
+.dr-head p{margin:2px 0 0;color:var(--ink-2);font-size:.82rem}
+.dr-x{margin-left:auto;width:36px;height:36px;border-radius:50%;border:0;background:var(--sunk);font-size:1.2rem;line-height:1;flex:none}
+.dr-body{flex:1;overflow:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:18px;overscroll-behavior:contain}
+.dr-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--panel)}
+.dr-foot .grow{flex:1}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;font-size:.85rem;color:var(--err);font-weight:600}
+fieldset{border:0;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+legend{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--copper-ink);margin-bottom:10px;padding:0}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.wide{grid-column:1/-1}
+.f label{font-size:.8rem;font-weight:600}
+.f .hint{font-size:.74rem;color:var(--ink-2)}
+.f input:not([type=checkbox]),.f select,.f textarea{width:100%;min-height:38px;padding:7px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg)}
+.f textarea{resize:vertical;min-height:76px;line-height:1.45}
+.f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--copper);outline-offset:0;border-color:var(--copper)}
+.f.bad input,.f.bad select,.f.bad textarea{border-color:var(--err)}
+.f .msg{font-size:.74rem;font-weight:600}
+.f .msg.err{color:var(--err)} .f .msg.warn{color:var(--warn)} .f .msg.info{color:var(--info)}
+.chk{display:flex;align-items:center;gap:8px;min-height:38px;font-size:.86rem;font-weight:500}
+.chk input{width:18px;height:18px;accent-color:var(--copper)}
+.multi{display:flex;flex-wrap:wrap;gap:6px 14px}
+.multi .chk{min-height:30px}
+.rec-issues{display:flex;flex-direction:column;gap:6px}
+.rec-issues div{font-size:.82rem;padding:7px 10px;border-radius:8px}
+.rec-issues .err{background:var(--err-bg);color:var(--err)} .rec-issues .warn{background:var(--warn-bg);color:var(--warn)} .rec-issues .info{background:var(--info-bg);color:var(--info)}
+/* export */
+.outs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}
+.out{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-width:0}
+.out-h{padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.out-h h3{font-size:1rem;font-weight:700}
+.out-h p{margin:0;color:var(--ink-2);font-size:.82rem}
+.out-h code{font-family:var(--f-mono);font-size:.76rem;background:var(--sunk);padding:1px 5px;border-radius:4px}
+.out pre{margin:0;max-height:200px;overflow:auto;background:var(--sunk);padding:12px 16px;font:400 .74rem/1.5 var(--f-mono);white-space:pre;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.out-f{display:flex;gap:8px;padding:10px 16px;align-items:center;flex-wrap:wrap}
+.out-f .meta{margin-left:auto;font-size:.75rem;color:var(--ink-2);font-family:var(--f-mono)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--charcoal);color:var(--on-charcoal);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.86rem;z-index:60;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:20;flex-direction:row;align-items:center;padding:10px 16px;gap:14px;overflow:visible}
+  .brand span,.side-foot,.nav-label{display:none}
+  .brand b{font-size:1.1rem}
+  .nav{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .nav-group{flex-direction:row;gap:4px}
+  .nav button{white-space:nowrap;padding:7px 10px;font-size:.84rem}
+  .nav .cnt{display:none}
+  fieldset{grid-template-columns:minmax(0,1fr)}
+  .hide-sm{display:none}
+}
+@media (prefers-reduced-motion: no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><small>Visit</small><b>Jaisalmer</b><span>Site admin</span></div>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <p class="side-foot">Edits are kept here. Use <strong>Publish to site</strong> to get the files your website reads.</p>
+  </aside>
+  <main class="main" id="main" tabindex="-1"></main>
+</div>
+<div id="drawerHost"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+'use strict';
+const DEFAULTS = {"places":[{"_uid":"r1d","id":"fort","name":"Jaisalmer Fort","tag":"Heritage · Living Fort","short":"A sandstone fort still lived in by thousands, rising straight out of the Thar.","visible":true,"why":"One of very few \"living forts\" left in the world — families, shops, guesthouses and temples still operate inside its walls, alongside a UNESCO-recognised hill fort site.","see":["The four massive gates along the entry ramp","Jain temples inside the fort walls, carved from the same sandstone","Raj Mahal, the former royal palace","Narrow inner lanes lined with carved havelis and craft shops"],"tips":"Wear shoes with grip — the ramp and inner lanes are uneven stone. Many havelis and shops inside are private homes; ask before photographing residents.","nearby":["Gadisar Lake","Patwon Ki Haveli","Gandhi Chowk market"],"bestTime":"Early morning or just before sunset, to avoid the midday heat and catch the stone turning gold.","location":"Central Jaisalmer, on Trikuta Hill","distance":"Walkable from most hotels in the old city","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.9124,"lng":70.9127,"mapCategory":"attractions","mapSub":"Fort & Havelis","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r2d","id":"patwon","name":"Patwon Ki Haveli","tag":"Heritage · Havelis","short":"A cluster of five ornately carved havelis built by a single merchant family.","visible":true,"why":"Considered the grandest haveli complex in Jaisalmer — the carved sandstone facades and jharokha balconies show off the city's stone-carving tradition at its peak.","see":["Intricately latticed stone windows (jharokhas)","Mirror and mural work inside select havelis","The narrow lane view looking up at all five facades together"],"tips":"Only part of the complex is open for a ticketed interior visit; the exterior can be appreciated for free from the lane.","nearby":["Nathmal Ki Haveli","Salim Singh Ki Haveli","Jaisalmer Fort"],"bestTime":"Mid-morning, when the lane is quieter and light hits the carvings well.","location":"Old city, a short walk from the fort","distance":"~10 minute walk from Jaisalmer Fort","address":"","timing":"","ticketText":"Ticketed interior visit for part of the complex; the exterior is free to see from the lane.","ticketUrl":"","lat":26.9147,"lng":70.9138,"mapCategory":"attractions","mapSub":"Fort & Havelis","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r3d","id":"salim","name":"Salim Singh Ki Haveli","tag":"Heritage · Havelis","short":"A haveli famous for its distinctive arched, ship-like upper structure.","visible":true,"why":"Built for a former prime minister of the state, its top floor flares outward and is often compared to a ship's stern or peacock — one of the more unusual silhouettes among Jaisalmer's havelis.","see":["The overhanging blue-tinged upper balcony","Carved brackets shaped like peacocks","Views back toward the fort from the rooftop"],"tips":"Smaller than Patwon Ki Haveli — pair it with the other two havelis in one loop rather than visiting alone.","nearby":["Patwon Ki Haveli","Nathmal Ki Haveli"],"bestTime":"Late afternoon light works well on the carved facade.","location":"Below the fort, old city","distance":"~12 minute walk from Jaisalmer Fort","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.9106,"lng":70.9145,"mapCategory":"attractions","mapSub":"Fort & Havelis","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r4d","id":"nathmal","name":"Nathmal Ki Haveli","tag":"Heritage · Havelis","short":"A former prime minister's residence, famously built by two brothers from opposite ends.","visible":true,"why":"Local lore holds that two brothers carved each half of the facade independently — the result is a building that is almost, but not quite, symmetrical.","see":["The two subtly different halves of the main facade","Detailed stone elephants flanking the entrance","Fine wall paintings in parts of the interior"],"tips":"Look closely at the two halves of the facade to spot the asymmetry — it's easy to miss at a glance.","nearby":["Patwon Ki Haveli","Salim Singh Ki Haveli"],"bestTime":"Morning, paired with Patwon and Salim Singh havelis.","location":"Old city, near Patwon Ki Haveli","distance":"~10 minute walk from Jaisalmer Fort","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.9142,"lng":70.9127,"mapCategory":"attractions","mapSub":"Fort & Havelis","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r5d","id":"gadisar","name":"Gadisar Lake","tag":"Nature · Lake","short":"A man-made lake that was once the city's main water source, ringed with small shrines.","visible":true,"why":"Built to store water for a desert city, the lake is now Jaisalmer's most relaxed public space — ghats, temples, and migratory birds in winter.","see":["The carved entrance gateway, Tilon Ki Pol","Small temples and chhatris along the banks","Migratory birds in the cooler months"],"tips":"Boat rides are available on the lake; agree the price and duration before boarding.","nearby":["Jaisalmer Fort","Gandhi Chowk market"],"bestTime":"Sunset, for boating and the golden light on the water.","location":"Southeast edge of the old city","distance":"~15 minute walk from Jaisalmer Fort","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.908,"lng":70.9219,"mapCategory":"attractions","mapSub":"Lakes","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r6d","id":"sulidungri","name":"Suli Dungri Viewpoint","tag":"Nature · Sunset Viewpoint","short":"A small hilltop lookout on the west side of town, with a sweeping view of the fort and the Golden City.","visible":true,"why":"Often simply called \"Sunset Point\" by locals, this quiet platform above the city gives one of the best panoramas of Jaisalmer Fort — especially as the sandstone glows at sunset and the fort lights come on after dark.","see":["A full panorama of Jaisalmer Fort and the old city","Sunset colours spreading across the sandstone rooftops","The fort lit up after dusk","A small hilltop temple"],"tips":"The last stretch is a short climb on uneven ground, so wear shoes with grip and carry a phone torch for the walk down after dark. There is a small temple on top, so be respectful of worshippers.","nearby":["Jaisalmer Fort","Old city lanes and markets"],"bestTime":"Arrive 30–40 minutes before sunset and stay until the fort lights come on.","location":"West side of the city, on the small hill above the Artist Colony, off Maka Pol","distance":"A short auto ride or uphill walk from the old city","address":"","timing":"","ticketText":"","ticketUrl":"","lat":null,"lng":null,"mapCategory":"attractions","mapSub":"","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r7d","id":"badabagh","name":"Bada Bagh","tag":"Heritage · Cenotaphs","short":"Royal cenotaphs (chhatris) set on a hillside, built for generations of Jaisalmer's rulers.","visible":true,"why":"Each domed chhatri commemorates a former ruler, making the site a compact, visual timeline of the Bhati dynasty — especially striking against a sunset sky.","see":["Rows of carved cenotaphs on the hillside","Wind turbines and open desert views beyond the site","A small dam and garden below the chhatris"],"tips":"Combine with Kuldhara and Sam Dunes if you're hiring a taxi for the afternoon — they sit roughly along the same route.","nearby":["Desert National Park route","Sam Sand Dunes route"],"bestTime":"Sunset — the site is oriented for it and gets busy right before dusk.","location":"A few kilometres north of the city","distance":"~15–20 minutes by taxi or auto from the fort","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.9583,"lng":70.8917,"mapCategory":"attractions","mapSub":"Monuments","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r8d","id":"kuldhara","name":"Kuldhara","tag":"Heritage · Abandoned village","short":"A centuries-old village abandoned overnight, now preserved as a heritage site.","visible":true,"why":"Once home to Paliwal Brahmins, the village was deserted under disputed historical circumstances and has remained empty since — now conserved with walking paths through its ruined homes.","see":["Rows of abandoned stone houses","A small on-site museum and temple","Open desert views from the village edge"],"tips":"There is an entry ticket. It pairs naturally with a Sam Dunes sunset trip on the same route.","nearby":["Sam Sand Dunes","Desert National Park"],"bestTime":"Late afternoon, before heading toward Sam Dunes for sunset.","location":"Southwest of Jaisalmer city","distance":"~25–30 minutes by taxi from the fort","address":"","timing":"","ticketText":"Entry ticket required.","ticketUrl":"","lat":26.8339,"lng":70.7864,"mapCategory":"attractions","mapSub":"Monuments","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"r9d","id":"warmuseum","name":"Jaisalmer War Museum","tag":"Heritage · War Museum","short":"An Indian Army museum honouring the soldiers of the 1965 and 1971 wars, including the Battle of Longewala.","visible":true,"why":"Built by the Indian Army's Desert Corps and opened in 2015, it tells the story of the 1971 Battle of Longewala — fought in the desert of this district — alongside the wider history of the Indian Army.","see":["Tanks, guns and military vehicles, including equipment captured in 1965 and 1971","The Hunter aircraft that attacked enemy tank columns at Longewala","Longewala Hall and Indian Army Hall, with models, maps and photographs","The Honour Wall with names of Param Vir Chakra and Maha Vir Chakra awardees"],"tips":"Allow 1–2 hours, including the short film in the Audio-Visual Room. Entry charges and show timings can change, so confirm locally before you go. It sits on the Jodhpur highway, so it fits easily into your arrival or departure day.","nearby":["Gadisar Lake","Jaisalmer Fort"],"bestTime":"Morning or late afternoon; stay into the evening if the light and sound show is running.","location":"Military Station, on the Jaisalmer–Jodhpur highway","distance":"~10 km from the city, about 20 minutes by taxi","address":"","timing":"","ticketText":"Entry charges apply and can change — confirm locally.","ticketUrl":"","lat":null,"lng":null,"mapCategory":"attractions","mapSub":"","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"rad","id":"tanot","name":"Tanot Mata Temple","tag":"Heritage · Border Temple","short":"A revered desert temple near the India–Pakistan border, cared for by the Border Security Force.","visible":true,"why":"During the 1965 war the area around the temple was heavily shelled, yet local belief holds that the shells missed or failed to explode. Since then the BSF has looked after the temple, and it has become a place of faith for soldiers and pilgrims alike.","see":["Unexploded shells from the 1965 war, displayed in the temple museum","The Vijay Stambh, a victory pillar built after the 1971 war","Daily aarti performed by BSF personnel","Wind farms and open dunes along the long drive out"],"tips":"Plan it as a full-day trip and carry water, snacks and ID, since facilities along the route are limited. It is a border area, so access can be restricted at times of tension; check before setting out. Pair it with Longewala on the same drive.","nearby":["Longewala War Memorial","Ghantiyali Mata Temple (on the way)"],"bestTime":"An early start from Jaisalmer, reaching by late morning; November to January is the most comfortable season.","location":"Tanot, near the India–Pakistan border in Jaisalmer district","distance":"~120 km from the city, about 2–2.5 hours by taxi","address":"","timing":"","ticketText":"","ticketUrl":"","lat":27.7984,"lng":70.3545,"mapCategory":"attractions","mapSub":"Temples","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"rbd","id":"dnp","name":"Desert National Park","tag":"Nature · Wildlife","short":"One of the largest protected desert ecosystems in the country, home to the great Indian bustard.","visible":true,"why":"A rare chance to see genuine desert wildlife and landscape — sand dunes, scrub, and salt flats — rather than just the tourist-facing dune fields.","see":["Great Indian bustard and other desert birds, seasonally","Rocky and sandy desert terrain","Salt water lakes within the park"],"tips":"Wildlife sightings, especially the bustard, are not guaranteed — go with realistic expectations and a good guide.","nearby":["Kuldhara","Sam Sand Dunes"],"bestTime":"Early morning for wildlife spotting, and cooler temperatures.","location":"Southwest of Jaisalmer, toward Sam","distance":"~40 minutes by taxi from the fort","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.8058,"lng":70.6294,"mapCategory":"experiences","mapSub":"Desert & Safari","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"rcd","id":"sam","name":"Sam Sand Dunes","tag":"Desert · Dunes","short":"The classic rolling sand dunes most people picture when they think of Jaisalmer.","visible":true,"why":"The most accessible large dune field near the city, and the main hub for camel and jeep safaris, sunset viewing, and desert camps.","see":["Rolling sand dunes stretching to the horizon","Sunset over the dune field","Camel and jeep safari operators along the access road"],"tips":"This is the busiest dune site near the city. For a quieter dune experience, Khuri is a calmer alternative.","nearby":["Kuldhara","Desert National Park","Khuri"],"bestTime":"Late afternoon into sunset — arrive with enough time before dusk.","location":"~40 km west of Jaisalmer city","distance":"~45–60 minutes by taxi from the fort","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.902,"lng":70.6197,"mapCategory":"experiences","mapSub":"Desert & Safari","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]},{"_uid":"rdd","id":"khuri","name":"Khuri","tag":"Desert · Village","short":"A quieter desert village with its own dunes, popular for overnight desert camps.","visible":true,"why":"A calmer alternative to Sam — smaller crowds, traditional mud-and-thatch houses, and dunes right at the edge of the village.","see":["Traditional Rajasthani mud houses","Smaller, quieter sand dunes","Village life away from the main tourist strip"],"tips":"Ask your camp or driver in advance about facilities — options are simpler here than at the larger Sam camps.","nearby":["Sam Sand Dunes","Desert National Park"],"bestTime":"Overnight, if you want a desert camp experience with fewer crowds than Sam.","location":"Southwest of Jaisalmer, near Sam","distance":"~50 minutes by taxi from the fort","address":"","timing":"","ticketText":"","ticketUrl":"","lat":26.7167,"lng":70.6167,"mapCategory":"experiences","mapSub":"Desert & Safari","phone":"","whatsapp":"","website":"","email":"","youtubeUrl":"","services":[]}],"activities":[{"_uid":"red","id":"camel-safari","name":"Camel Safari","cat":"Desert","description":"Experience the Thar on camelback, from short desert rides to sunset experiences.","duration":"Typically 1–2 hrs","location":"Sam / Khuri","bestTime":"Best at sunset","suitableFor":["Couples","Families","Photography","Solo"],"experiencePoints":["Camel ride across the dunes","Golden dunes","Sunset views","Photography"],"mapRefs":["sam","khuri"],"areas":["sam","khuri"],"keywords":["safari","camel ride","desert","dunes"]},{"_uid":"rfd","id":"jeep-safari","name":"Jeep Safari","cat":"Desert","description":"Cover more of the desert by jeep — dune tracks, open sand and wide desert views beyond the main viewpoint.","location":"Sam / Khuri dunes","bestTime":"Late afternoon into sunset","suitableFor":["Families","Groups","Adventure","Photography"],"experiencePoints":["Jeep ride over desert tracks","Open desert landscapes","Photo stops","Sunset from the sand"],"mapRefs":["sam","khuri"],"areas":["sam","khuri"],"keywords":["safari","jeep","4x4","desert"]},{"_uid":"rgd","id":"dune-bashing","name":"Dune Bashing","cat":"Desert","description":"Fast, bumpy 4x4 rides over the dunes — an adrenaline-led add-on to a desert evening. Ask the operator about seat belts and driver experience before you go.","location":"Sam dunes","bestTime":"Late afternoon","suitableFor":["Adventure","Groups"],"experiencePoints":["4x4 drive over sand dunes","Steep dune climbs and drops","Group fun"],"mapRefs":["sam"],"areas":["sam"],"keywords":["jeep","4x4","adrenaline","desert","dunes"]},{"_uid":"rhd","id":"parasailing","name":"Parasailing","cat":"Adventure","description":"Rise above the dunes under a parasail for a short flight and wide views of the desert. Age, weight and weather limits vary by operator — ask about safety gear before you book.","location":"Sam dunes","bestTime":"Morning or late afternoon, in calm weather","suitableFor":["Adventure","Couples","Groups","Photography"],"experiencePoints":["A short flight over the dunes","Wide desert views from the air","Photos and video from above"],"mapRefs":["sam"],"areas":["sam"],"keywords":["adventure","parasail","parasailing","flying","air","sports","dunes"]},{"_uid":"rid","id":"paramotoring","name":"Paramotoring","cat":"Adventure","description":"Fly over the Thar in a motorised paraglider, usually as a tandem flight with a pilot. Ask the operator about pilot experience, safety gear and weather cancellations.","location":"Sam dunes","bestTime":"Morning or late afternoon, in calm weather","suitableFor":["Adventure","Couples","Photography"],"experiencePoints":["Bird's-eye view of the dunes","Motorised paraglider flight","Aerial photos and video"],"mapRefs":["sam"],"areas":["sam"],"keywords":["adventure","paramotor","paramotoring","paraglider","paragliding","flying","air","sports","dunes"]},{"_uid":"rjd","id":"rajasthani-cultural-evening","name":"Rajasthani Cultural Evening","cat":"Culture","description":"An evening of Rajasthani folk music and traditional dance — live songs, instruments and performances, often at desert camps and cultural venues.","duration":"An evening","location":"Desert camps and city venues","bestTime":"After sunset","suitableFor":["Families","Couples","Groups","Photography"],"experiencePoints":["Live folk music","Traditional dance, including Kalbeliya","Traditional costume and instruments","An evening out under the stars"],"mapRefs":[],"areas":["sam","khuri","fort"],"keywords":["music","folk","live music","dance","kalbeliya","culture","cultural","evening","show"]},{"_uid":"rkd","id":"reel-photographer","name":"Reel Photographer","cat":"Photography","description":"Hire a local photographer to film short vertical videos of you against Jaisalmer's golden backdrops, ready for Instagram Reels or YouTube Shorts.","location":"Fort, havelis, Gadisar Lake and the dunes","bestTime":"Early morning or the hour before sunset","suitableFor":["Couples","Solo","Families","Groups","Photography"],"experiencePoints":["Short vertical videos for Reels and Shorts","Help with poses, walks and transitions","Fort lanes, havelis, lake and dunes as backdrops","Edited clips, often with music"],"mapRefs":["fort","patwon","gadisar","sam"],"areas":["fort","gadisar","sam"],"keywords":["reel","reels","reel photographer","photographer","photo","photography","instagram","video","videographer","shorts","shoot"],"optionsTitle":"Before you book","options":[{"id":"find-reel-photographer","name":"Find a reel photographer","summary":"Agree the price, shoot length, locations, number of edited reels and delivery time before you start.","note":"Many havelis are homes or ticketed, so check the rules before filming inside or filming residents.","cta":"Find photographers on the map","map":{"cat":"services","sub":"Photographers"}}]},{"_uid":"rld","id":"stargazing","name":"Stargazing","cat":"Night","description":"Watch the night sky from the desert, well away from the city lights.","location":"Sam / Khuri","bestTime":"Clear, moonless nights","suitableFor":["Couples","Families","Solo","Photography"],"experiencePoints":["Dark desert skies","Stars and constellations","Night photography","Often paired with a desert camp"],"mapRefs":["sam","khuri"],"areas":["sam","khuri"],"keywords":["stars","night sky","astronomy","night","camp"]},{"_uid":"rmd","id":"sunset-at-the-dunes","name":"Sunset at the Dunes","cat":"Night","description":"Watch the light change over the dunes as the sun goes down — the classic Jaisalmer evening.","location":"Sam / Khuri","bestTime":"An hour or so before sunset","suitableFor":["Couples","Families","Photography","Solo"],"experiencePoints":["Golden light on the dunes","Photography","Easy to pair with a camel or jeep ride"],"mapRefs":["sam","khuri"],"areas":["sam","khuri"],"keywords":["sunset","dunes","sam","khuri","golden hour","night"]},{"_uid":"rnd","id":"market-shopping","name":"Market Shopping","cat":"Shopping","description":"Wander the old-city bazaars and the lanes around Gandhi Chowk for souvenirs, gifts and everyday local life.","location":"Gandhi Chowk and old-city bazaars","bestTime":"Late afternoon, when it is cooler","suitableFor":["Families","Couples","Solo","Groups"],"experiencePoints":["Lively bazaar lanes","Souvenirs and gifts","Browsing and bargaining"],"mapRefs":[],"areas":["gandhi","fort"],"keywords":["shopping","bazaar","gandhi chowk","souvenirs","gifts"]},{"_uid":"rod","id":"handicrafts-textiles","name":"Handicrafts & Textiles","cat":"Shopping","description":"Look for locally made Rajasthani crafts and fabrics — embroidery, mirror-work, patchwork and leather goods — in craft shops and old-city lanes.","location":"Old-city lanes, Gandhi Chowk and fort-area shops","bestTime":"Late afternoon, when it is cooler","suitableFor":["Families","Couples","Solo","Groups"],"experiencePoints":["Embroidery and mirror-work","Patchwork and textiles","Leather goods","Local craft shops"],"mapRefs":[],"areas":["gandhi","fort"],"keywords":["handicrafts","handicraft","textiles","textile","embroidery","mirror work","patchwork","leather","crafts","shopping","fabric"]},{"_uid":"rpd","id":"rajasthani-thali","name":"Rajasthani Thali","cat":"Food","description":"Sit down to a Rajasthani thali — regional dishes, breads and sweets served together in one meal.","location":"Restaurants across the old city","bestTime":"Lunch or dinner","suitableFor":["Families","Couples","Solo","Groups"],"experiencePoints":["A full meal served on one platter","Regional Rajasthani flavours","Dal, breads and sweets"],"mapRefs":[],"areas":["fort","gandhi"],"keywords":["food","dinner","lunch","restaurant","thali","eat"]},{"_uid":"rqd","id":"village-visit","name":"Village Visit","cat":"Culture","description":"Visit a desert village to see everyday life, local crafts and the surrounding landscape at a slower pace. Ask before photographing people.","location":"Khuri and nearby villages","bestTime":"Morning or late afternoon","suitableFor":["Families","Solo","Couples","Photography"],"experiencePoints":["Traditional village homes","Local crafts and daily life","Quiet desert landscape"],"mapRefs":["khuri"],"areas":["khuri"],"keywords":["khuri","rural","village","culture"]},{"_uid":"rrd","id":"lake-boating","name":"Lake Boating","cat":"Nature","description":"Take a slow boat ride on Gadisar Lake, ringed with small shrines.","location":"Gadisar Lake","bestTime":"Early morning or around sunset","suitableFor":["Families","Couples","Solo","Photography"],"experiencePoints":["Boat ride on the lake","Shrines along the shore","Soft light on the water"],"mapRefs":["gadisar"],"areas":["gadisar"],"keywords":["gadisar","boat","boating","lake","nature"]}],"landmarks":[{"_uid":"rsd","id":"gandhi-chowk","slug":"gandhi-chowk","type":"place","name":"Gandhi Chowk Market","category":"shopping","subcategory":"Markets","lat":26.9135,"lng":70.9146,"tag":"Market · Old City","aliases":["Gandhi Chowk"],"keywords":["shopping","bazaar","textiles","leather","silver","street food","food"],"short":"Jaisalmer's central old-city market — textiles, leather goods, silver and street food, a short walk from the fort."},{"_uid":"rtd","id":"railway","slug":"railway","type":"place","name":"Jaisalmer Railway Station","category":"transport","subcategory":"Railway Station","lat":26.9152,"lng":70.9269,"tag":"Transport · Railway","keywords":["train","station","railway","autos","taxis"],"short":"The city's railway station, on the Jodhpur–Jaisalmer line. Autos and taxis are usually available just outside."},{"_uid":"rud","id":"airport","slug":"airport","type":"place","name":"Jaisalmer Airport (JSA)","category":"transport","subcategory":"Airport","lat":26.8803,"lng":70.855,"tag":"Transport · Airport","keywords":["flight","airport","flights","jsa"],"short":"Domestic airport about 12–13 km from the city centre, operating on an Indian Air Force base."},{"_uid":"rvd","id":"jawahir-hospital","slug":"jawahir-hospital","type":"place","name":"Shri Jawahir Hospital","category":"essential","subcategory":"Hospital","lat":26.9165,"lng":70.9072,"tag":"Health · Government hospital","keywords":["hospital","doctor","medical","emergency","health"],"short":"The district's main government hospital, CVS Colony — general medicine, pediatrics, gynaecology and more."}],"transport":[],"operators":[],"experiences":[],"sponsors":[],"historyAudio":[{"_uid":"rwd","attractionId":"fort","type":"history","language":"en","title":"History of Jaisalmer Fort","audioUrl":"assets/audio/history/en/jaisalmer-fort.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"rxd","attractionId":"patwon","type":"history","language":"en","title":"History of Patwon Ki Haveli","audioUrl":"assets/audio/history/en/patwon-ki-haveli.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"ryd","attractionId":"salim","type":"history","language":"en","title":"History of Salim Singh Ki Haveli","audioUrl":"assets/audio/history/en/salim-singh-ki-haveli.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"rzd","attractionId":"nathmal","type":"history","language":"en","title":"History of Nathmal Ki Haveli","audioUrl":"assets/audio/history/en/nathmal-ki-haveli.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r10d","attractionId":"gadisar","type":"history","language":"en","title":"History of Gadisar Lake","audioUrl":"assets/audio/history/en/gadisar-lake.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r11d","attractionId":"sulidungri","type":"history","language":"en","title":"Story of Suli Dungri Viewpoint","audioUrl":"assets/audio/history/en/suli-dungri-viewpoint.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r12d","attractionId":"badabagh","type":"history","language":"en","title":"History of Bada Bagh","audioUrl":"assets/audio/history/en/bada-bagh.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r13d","attractionId":"kuldhara","type":"history","language":"en","title":"History of Kuldhara","audioUrl":"assets/audio/history/en/kuldhara.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r14d","attractionId":"warmuseum","type":"history","language":"en","title":"Story of the Jaisalmer War Museum","audioUrl":"assets/audio/history/en/jaisalmer-war-museum.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r15d","attractionId":"tanot","type":"history","language":"en","title":"Story of Tanot Mata Temple","audioUrl":"assets/audio/history/en/tanot-mata-temple.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r16d","attractionId":"dnp","type":"history","language":"en","title":"Story of Desert National Park","audioUrl":"assets/audio/history/en/desert-national-park.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r17d","attractionId":"sam","type":"history","language":"en","title":"Story of the Sam Sand Dunes","audioUrl":"assets/audio/history/en/sam-sand-dunes.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""},{"_uid":"r18d","attractionId":"khuri","type":"history","language":"en","title":"Story of Khuri","audioUrl":"assets/audio/history/en/khuri.mp3","duration":null,"transcript":"","narrator":"","enabled":true,"published":false,"createdAt":"","updatedAt":""}],"guidance":[{"_uid":"r19d","id":"intro","title":"Welcome to Visit Jaisalmer","page":"home","section":"site","triggerType":"first-visit","sourceType":"tts","order":0,"language":{"hi":{"text":"नमस्कार! Visit Jaisalmer में आपका स्वागत है। Audio Guide आपको वेबसाइट explore करने और अलग-अलग सुविधाओं को समझने में मदद करेगा। आप इसे कभी भी बंद कर सकते हैं।","audioUrl":""},"en":{"text":"Welcome to Visit Jaisalmer. Your Audio Guide can help you explore places, services, maps and travel information. You can turn it off anytime.","audioUrl":""}}},{"_uid":"r1ad","id":"home","title":"Using this website","page":"home","section":"top","triggerType":"help-request","sourceType":"tts","order":1,"language":{"hi":{"text":"यह Visit Jaisalmer का मुख्य पेज है। ऊपर के menu से Explore, Plan a trip, Things to do, Getting around और Map खोलें। Tourist Mode में आप अपने आसपास की जगहें और सेवाएँ देख सकते हैं।","audioUrl":""},"en":{"text":"This is the Visit Jaisalmer home page. Use the menu at the top to open Explore, Plan a trip, Things to do, Getting around and the Map. Tourist Mode shows places and services near you.","audioUrl":""}}},{"_uid":"r1bd","id":"explore","title":"Explore Jaisalmer","page":"home","section":"explore","triggerType":"section-open","sourceType":"tts","order":2,"language":{"hi":{"text":"यहाँ आप जैसलमेर की अलग-अलग पर्यटन जगहों को खोज सकते हैं। किसी जगह को खोलकर उसकी जानकारी, location और उपलब्ध सुविधाएँ देखें। कई जगहों पर उनकी कहानी भी सुन सकते हैं।","audioUrl":""},"en":{"text":"Here you can discover Jaisalmer's main sights. Open any place to see its information, location and the services around it. Many places also have a history story you can listen to.","audioUrl":""}}},{"_uid":"r1cd","id":"plan","title":"Plan your trip","page":"home","section":"plan","triggerType":"section-open","sourceType":"tts","order":3,"language":{"hi":{"text":"यहाँ से आप अपने जैसलमेर trip को बेहतर तरीके से plan कर सकते हैं। एक tab चुनें और सुबह, दोपहर और शाम का सुझाया गया क्रम देखें।","audioUrl":""},"en":{"text":"Plan your Jaisalmer trip here. Pick a tab to see a realistic morning, afternoon and evening sequence.","audioUrl":""}}},{"_uid":"r1dd","id":"things-to-do","title":"Things to do","page":"home","section":"things-to-do","triggerType":"section-open","sourceType":"tts","order":4,"language":{"hi":{"text":"यहाँ आप जैसलमेर में करने वाली अलग-अलग activities और experiences खोज सकते हैं। किसी activity को खोलकर उसकी जानकारी और local operators देखें।","audioUrl":""},"en":{"text":"Here you can find activities and experiences around Jaisalmer. Open one to see what it involves and which local operators offer it.","audioUrl":""}}},{"_uid":"r1ed","id":"transport","title":"Getting around","page":"home","section":"transport","triggerType":"service-help","sourceType":"tts","order":5,"language":{"hi":{"text":"यहाँ आप auto, taxi, local driver, bike rental, scooty rental और अन्य transport options खोज सकते हैं। ऊपर से यात्रा का तरीका चुनें, फिर provider से Call या WhatsApp पर सीधे बात करें।","audioUrl":""},"en":{"text":"Find autos, taxis, local drivers, bike and scooty rentals and desert transfers here. Choose how you want to travel, then contact the provider directly by call or WhatsApp.","audioUrl":""}}},{"_uid":"r1fd","id":"map","title":"Smart Tourist Map","page":"map","section":"map","triggerType":"map-help","sourceType":"tts","order":6,"language":{"hi":{"text":"Smart Tourist Map से आप आसपास की attractions, services और important locations खोज सकते हैं। Map पर किसी location को चुनकर उसकी details देखें, या ऊपर के filters से category चुनें।","audioUrl":""},"en":{"text":"The Smart Tourist Map shows attractions, services and important locations around you. Select a location to see its details, or use the filters at the top to choose a category.","audioUrl":""}}},{"_uid":"r1gd","id":"tourist-mode","title":"Tourist Mode","page":"home","section":"tourist-mode","triggerType":"tourist-mode","sourceType":"tts","order":7,"language":{"hi":{"text":"Tourist Mode में बताइए कि आप कहाँ हैं, या अपनी location share करें। फिर आपको आसपास की जगहें और ज़रूरी सेवाएँ दिखेंगी। आगे क्या करना है, यह तय करने के लिए Guide Me चुनें।","audioUrl":""},"en":{"text":"In Tourist Mode, tell us roughly where you are, or share your location, to see nearby places and essential services. Choose Guide Me to decide what to do next.","audioUrl":""}}},{"_uid":"r1hd","id":"place","title":"About this place","page":"place","section":"place","triggerType":"place-open","sourceType":"tts","order":8,"language":{"hi":{"text":"{name}. नीचे दिए गए sections में इसकी location, घूमने का सही समय, entry की जानकारी और आसपास की जगहें हैं।{history}","audioUrl":"","history":" इसकी कहानी सुनने के लिए Listen to History चुनें।"},"en":{"text":"{name}. {short} Below you'll find its location, the best time to visit, entry details and nearby places.{history}","audioUrl":"","history":" To hear its story, choose Listen to History."}}},{"_uid":"r1id","id":"go-explore","title":"Explore Places","page":"tourist-mode","section":"guide-me","triggerType":"tourist-mode","sourceType":"tts","order":20,"language":{"hi":{"text":"आइए जैसलमेर की प्रमुख जगहों को explore करते हैं।","audioUrl":""},"en":{"text":"Let's explore Jaisalmer's main sights.","audioUrl":""}}},{"_uid":"r1jd","id":"go-desert","title":"Desert Experience","page":"tourist-mode","section":"guide-me","triggerType":"tourist-mode","sourceType":"tts","order":21,"language":{"hi":{"text":"Camel safari, jeep safari, dunes पर sunset और रात के अनुभव Things to do में हैं।","audioUrl":""},"en":{"text":"Camel and jeep safaris, sunset on the dunes and night experiences are all in Things to do.","audioUrl":""}}},{"_uid":"r1kd","id":"go-transport","title":"Find Transport","page":"tourist-mode","section":"guide-me","triggerType":"tourist-mode","sourceType":"tts","order":22,"language":{"hi":{"text":"यहाँ transport के सभी विकल्प हैं। अपनी ज़रूरत का तरीका चुनें।","audioUrl":""},"en":{"text":"Here are all the ways to get around. Choose the one you need.","audioUrl":""}}},{"_uid":"r1ld","id":"go-map","title":"Use Tourist Map","page":"tourist-mode","section":"guide-me","triggerType":"tourist-mode","sourceType":"tts","order":23,"language":{"hi":{"text":"Smart Tourist Map खुल रहा है। किसी location को चुनकर उसकी details देखें।","audioUrl":""},"en":{"text":"Opening the Smart Tourist Map. Select a location to see its details.","audioUrl":""}}},{"_uid":"r1md","id":"go-history","title":"Listen to History","page":"tourist-mode","section":"guide-me","triggerType":"tourist-mode","sourceType":"tts","order":24,"language":{"hi":{"text":"किसी भी जगह को खोलें और Listen to History दबाएँ। कहानी तभी चलेगी जब आप उसे चुनेंगे।","audioUrl":""},"en":{"text":"Open any place and press Listen to History. A story only plays when you choose it.","audioUrl":""}}},{"_uid":"r1nd","id":"go-expert","title":"Find Local Expert","page":"tourist-mode","section":"guide-me","triggerType":"tourist-mode","sourceType":"tts","order":25,"language":{"hi":{"text":"Map पर local guides दिख रहे हैं। Photographers देखने के लिए ऊपर का filter बदलें।","audioUrl":""},"en":{"text":"The map now shows local guides. Switch the filter at the top to see photographers.","audioUrl":""}}},{"_uid":"r1od","id":"go-plan","title":"Plan My Trip","page":"tourist-mode","section":"guide-me","triggerType":"tourist-mode","sourceType":"tts","order":26,"language":{"hi":{"text":"आइए आपके जैसलमेर trip का plan देखते हैं।","audioUrl":""},"en":{"text":"Let's look at a plan for your Jaisalmer trip.","audioUrl":""}}},{"_uid":"r1pd","id":"help","title":"Help","page":"any","section":"help","triggerType":"help-request","sourceType":"tts","order":27,"language":{"hi":{"text":"किसी भी section में What can I do here दबाकर उसकी जानकारी सुनें। Audio रोकने के लिए player का close बटन दबाएँ। आपात स्थिति में 112 पर call करें।","audioUrl":""},"en":{"text":"Press What can I do here in any section to hear what it offers. Close the player anytime to stop the audio. In an emergency, call 112.","audioUrl":""}}}],"houseAds":[{"_uid":"r1qd","id":"house-itinerary","title":"Planning a few days here?","ctaText":"See the itineraries","target":"#plan","description":"Ready-made Jaisalmer plans from one day to a desert-focused trip, morning to evening, with the stops linked to the Smart Tourist Map.","placements":["place-exploration","audio-guide","map-location"]},{"_uid":"r1rd","id":"house-map","title":"Everything nearby, on one map","ctaText":"Open the map","target":"#map","description":"Attractions, food, transport and essentials around you, with walking and driving directions.","placements":["place-exploration","audio-guide","itinerary"]}],"partners":[{"_uid":"r1sd","name":"Golden Fort Heritage Walks","category":"Tour Operators","logo":null,"url":null,"order":1,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r1td","name":"Desert Trail Camel Safaris","category":"Safari / Desert Experience Partners","logo":null,"url":null,"order":2,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r1ud","name":"Thar Dunes Camp","category":"Hotels","logo":null,"url":null,"order":3,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r1vd","name":"City Taxi Co-operative","category":"Transport Partners","logo":null,"url":null,"order":4,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r1wd","name":"Jaisalmer Craft Bazaar","category":"Local Businesses","logo":null,"url":null,"order":5,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r1xd","name":"Haveli Homestays Collective","category":"Hotels","logo":null,"url":null,"order":6,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r1yd","name":"Sunset Point Jeep Tours","category":"Safari / Desert Experience Partners","logo":null,"url":null,"order":7,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r1zd","name":"Old Town Auto Union","category":"Transport Partners","logo":null,"url":null,"order":8,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r20d","name":"Rajasthan Roots Guides","category":"Tourism Partners","logo":null,"url":null,"order":9,"active":true,"verified":false,"featured":false,"placeholder":true},{"_uid":"r21d","name":"Local Handicrafts Cooperative","category":"Local Service Partners","logo":null,"url":null,"order":10,"active":true,"verified":false,"featured":false,"placeholder":true}],"settings":[{"_uid":"settings","showPlaceholders":true,"socialYoutube":"","socialFacebook":"","socialInstagram":"","socialX":"","newsletterEndpoint":"","addServiceEndpoint":"","transportFeed":"","activityFeed":"","historyAudioFeed":"","guidanceFeed":"","sponsorFeed":"","mapDataFeed":"","tiles":"osm","routing":"fossgis","maptilerKey":"","mapboxToken":"","adsEnabled":true,"maxAdsPerSession":3,"maxAdsPerDay":6,"globalCooldownMinutes":10,"googleEnabled":false,"googleAdUnitPath":""}]};
+const REF = {"modes":[{"id":"guide","label":"Tour Guide"},{"id":"taxi","label":"Taxi & Cab"},{"id":"auto","label":"Auto Rickshaw"},{"id":"bike","label":"Bike Rental"},{"id":"scooty","label":"Scooty Rental"},{"id":"car","label":"Car Rental"},{"id":"transfers","label":"Transfers"}],"services":[{"id":"camel-safari","label":"Camel Safari"},{"id":"jeep-safari","label":"Jeep Safari"},{"id":"desert-camp","label":"Desert Camp"},{"id":"boating","label":"Lake Boating"},{"id":"taxi","label":"Taxi"},{"id":"auto","label":"Auto Rickshaw"},{"id":"guide","label":"Local Guide"},{"id":"food","label":"Food"},{"id":"shopping","label":"Shopping"},{"id":"atm","label":"ATM"},{"id":"toilet","label":"Toilet"},{"id":"parking","label":"Parking"},{"id":"petrol","label":"Petrol"},{"id":"hospital","label":"Hospital"},{"id":"emergency","label":"Emergency"},{"id":"pharmacy","label":"Pharmacy"},{"id":"attractions","label":"Attractions"}],"areas":["fort","gandhi","gadisar","sulidungri","badabagh","warmuseum","kuldhara","dnp","sam","khuri","tanot"]};
+
+/* ================= helpers ================= */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = o=>JSON.parse(JSON.stringify(o));
+const newUid = ()=>'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const getP = (o,p)=>p.split('.').reduce((a,k)=>a==null?undefined:a[k],o);
+function setP(o,p,v){const ks=p.split('.');let a=o;ks.slice(0,-1).forEach(k=>{if(!a[k]||typeof a[k]!=='object')a[k]={};a=a[k];});a[ks[ks.length-1]]=v;}
+const blank = v=>v==null||v===''||(Array.isArray(v)&&!v.length);
+const ID_RE=/^[A-Za-z0-9][A-Za-z0-9_.-]{0,80}$/;
+const telOk=v=>/^\+?\d{7,15}$/.test(String(v).replace(/[\s()-]/g,''));
+const waOk=v=>{const d=String(v).replace(/\D/g,'');return d.length===10||(d.length>=11&&d.length<=15);};
+const httpsOk=v=>{try{return new URL(v).protocol==='https:';}catch(e){return false;}};
+const linkOk=v=>/^(\/(?!\/)|#)/.test(v)||httpsOk(v);
+const mailOk=v=>/^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/i.test(v);
+const audioOk=v=>/\.(mp3|m4a|aac|ogg|oga|opus|webm|wav)(\?|#|$)/i.test(v);
+const ytOk=v=>/^https?:\/\/(www\.|m\.)?(youtube\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[A-Za-z0-9_-]{11}/.test(v);
+const llOk=(a,b)=>typeof a==='number'&&typeof b==='number'&&isFinite(a)&&isFinite(b)&&a>=-90&&a<=90&&b>=-180&&b<=180;
+const dayMs=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v||'');return m?new Date(+m[1],+m[2]-1,+m[3]).getTime():null;};
+let toastT=0;function toast(t){const n=$('#toast');n.textContent=t;n.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>n.hidden=true,2600);}
+
+/* ================= reference lists ================= */
+const MAP_CATS=['attractions','experiences','food','shopping','transport','essential','services'];
+const PLACEMENTS=['place-exploration','audio-guide','itinerary','map-location'];
+const PARTNER_CATS=['Tourism Partners','Local Businesses','Hotels','Tour Operators','Transport Partners','Safari / Desert Experience Partners','Media Partners','Local Service Partners'];
+const ACT_CATS=['Desert','Adventure','Culture','Photography','Night','Shopping','Food','Nature'];
+const TRIGGERS=['first-visit','section-open','button-click','help-request','tourist-mode','place-open','map-help','service-help','manual'];
+const opt=(v,l)=>({v,l:l==null?v:l});
+
+/* ================= dataset schemas =================
+   Each field: k (dotted path), l label, t type, req, hint, o options, wide.
+   Records keep any keys the form doesn't know about, so nothing is lost on save. */
+const DS = {
+places:{label:'Places',group:'Content',one:'place',key:'id',
+  hint:'The sights in Explore Jaisalmer, with their map pin.',
+  title:r=>r.name, sub:r=>r.tag,
+  cols:[['Location',r=>r.location],['Map pin',r=>llOk(r.lat,r.lng)?r.lat.toFixed(4)+', '+r.lng.toFixed(4):'—','num']],
+  pills:r=>[r.visible===false?['Hidden','warn']:['Live','ok'], llOk(r.lat,r.lng)?null:['No map pin','info'], r.youtubeUrl?['Video','info']:null],
+  groups:[
+    ['Basics',[{k:'id',l:'Place ID',t:'text',req:1,hint:'Lowercase, used in links like #place/fort. Don’t change once live.'},{k:'name',l:'Name',t:'text',req:1},{k:'tag',l:'Label',t:'text',hint:'e.g. Heritage · Havelis'},{k:'visible',l:'Show on website',t:'bool'},{k:'short',l:'One-line summary',t:'textarea',wide:1,req:1}]],
+    ['Story',[{k:'why',l:'Why visit',t:'textarea',wide:1},{k:'see',l:'Things to see',t:'list',wide:1,hint:'One per line'},{k:'tips',l:'Useful tips',t:'textarea',wide:1},{k:'nearby',l:'Nearby',t:'list',wide:1,hint:'One per line. Names of other places link automatically.'}]],
+    ['Visitor information',[{k:'bestTime',l:'Best time',t:'text',wide:1},{k:'location',l:'Location',t:'text'},{k:'distance',l:'Distance',t:'text'},{k:'address',l:'Address',t:'text'},{k:'timing',l:'Opening hours',t:'text'},{k:'ticketText',l:'Entry / ticket note',t:'text'},{k:'ticketUrl',l:'Ticket link',t:'url',hint:'https:// only'}]],
+    ['Map',[{k:'lat',l:'Latitude',t:'number',hint:'Verified coordinates only'},{k:'lng',l:'Longitude',t:'number'},{k:'mapCategory',l:'Map category',t:'select',o:MAP_CATS.map(c=>opt(c))},{k:'mapSub',l:'Map sub-category',t:'text',hint:'e.g. Fort & Havelis, Lakes, Temples'}]],
+    ['Official contact',[{k:'phone',l:'Phone',t:'tel'},{k:'whatsapp',l:'WhatsApp',t:'tel'},{k:'website',l:'Website',t:'url'},{k:'email',l:'Email',t:'text'}]],
+    ['Media & services',[{k:'youtubeUrl',l:'YouTube video',t:'url',wide:1,hint:'A youtube.com or youtu.be link. Leave empty for no video.'},{k:'services',l:'Services at this place',t:'multi',wide:1,o:()=>REF.services.map(s=>opt(s.id,s.label)),hint:'Leave all unticked to use the area’s default list.'}]]
+  ],
+  check(r,all){const o=[];idCheck(o,r,'id',all,'Place ID');need(o,r,'name','Name');need(o,r,'short','Summary');
+    const hasLat=!blank(r.lat),hasLng=!blank(r.lng);
+    if(hasLat||hasLng){if(!llOk(r.lat,r.lng))o.push(['err','Map pin coordinates are out of range','lat']);}
+    else o.push(['info','No verified coordinates, so it isn’t pinned on the Smart Map','lat']);
+    if(r.ticketUrl&&!httpsOk(r.ticketUrl))o.push(['err','Ticket link must start with https://','ticketUrl']);
+    if(r.website&&!httpsOk(r.website))o.push(['err','Website must start with https://','website']);
+    if(r.phone&&!telOk(r.phone))o.push(['err','Phone needs 7–15 digits','phone']);
+    if(r.whatsapp&&!waOk(r.whatsapp))o.push(['err','WhatsApp needs a 10-digit mobile or a full international number','whatsapp']);
+    if(r.email&&!mailOk(r.email))o.push(['err','Email doesn’t look valid','email']);
+    if(r.youtubeUrl&&!ytOk(r.youtubeUrl))o.push(['warn','Not a recognised YouTube link — the video won’t show','youtubeUrl']);
+    if(r.visible===false)o.push(['info','Hidden from the website','visible']);
+    return o;}},
+landmarks:{label:'Map landmarks',group:'Content',one:'landmark',key:'id',
+  hint:'Markets, stations, hospitals and other verified points on the Smart Tourist Map.',
+  title:r=>r.name,sub:r=>r.tag,
+  cols:[['Category',r=>r.category+(r.subcategory?' · '+r.subcategory:'')],['Coordinates',r=>llOk(r.lat,r.lng)?r.lat.toFixed(4)+', '+r.lng.toFixed(4):'—','num']],
+  pills:r=>[r.visible===false?['Hidden','warn']:['Live','ok']],
+  groups:[['Basics',[{k:'id',l:'ID',t:'text',req:1},{k:'slug',l:'Link slug',t:'text',hint:'Used in #map/<slug>. Usually the same as the ID.'},{k:'name',l:'Name',t:'text',req:1},{k:'tag',l:'Label',t:'text'},{k:'category',l:'Map category',t:'select',o:MAP_CATS.map(c=>opt(c)),req:1},{k:'subcategory',l:'Sub-category',t:'text'},{k:'visible',l:'Show on map',t:'bool'},{k:'short',l:'Summary',t:'textarea',wide:1}]],
+    ['Location',[{k:'lat',l:'Latitude',t:'number',req:1},{k:'lng',l:'Longitude',t:'number',req:1},{k:'address',l:'Address',t:'text',wide:1}]],
+    ['Details',[{k:'phone',l:'Phone',t:'tel'},{k:'website',l:'Website',t:'url'},{k:'openingInfo',l:'Hours',t:'text'},{k:'bestTime',l:'Best time',t:'text'},{k:'aliases',l:'Other names',t:'list'},{k:'keywords',l:'Search keywords',t:'list'}]]],
+  check(r,all){const o=[];idCheck(o,r,'id',all,'ID');need(o,r,'name','Name');
+    if(!MAP_CATS.includes(r.category))o.push(['err','Pick a map category','category']);
+    if(!llOk(r.lat,r.lng))o.push(['err','Needs valid coordinates to appear on the map','lat']);
+    if(r.slug&&!ID_RE.test(r.slug))o.push(['err','Slug can only use letters, numbers, - _ .','slug']);
+    if(r.phone&&!telOk(r.phone))o.push(['err','Phone needs 7–15 digits','phone']);
+    if(r.website&&!httpsOk(r.website))o.push(['err','Website must start with https://','website']);
+    return o;}},
+activities:{label:'Things to do',group:'Content',one:'activity',key:'id',
+  hint:'Activity guides in Things to do. Operators and their offers are managed under Local business.',
+  title:r=>r.name,sub:r=>r.cat,
+  cols:[['Where',r=>r.location],['Best time',r=>r.bestTime]],
+  pills:r=>{const n=state.data.experiences.filter(e=>e.activityId===r.id).length;return [n?[n+' offer'+(n>1?'s':''),'ok']:['No operators yet','info']];},
+  groups:[['Basics',[{k:'id',l:'Activity ID',t:'text',req:1},{k:'name',l:'Name',t:'text',req:1},{k:'cat',l:'Category',t:'select',o:ACT_CATS.map(c=>opt(c))},{k:'duration',l:'Typical duration',t:'text'},{k:'description',l:'Description',t:'textarea',wide:1,req:1}]],
+    ['Details',[{k:'location',l:'Where',t:'text'},{k:'bestTime',l:'Best time',t:'text'},{k:'experiencePoints',l:'What you’ll experience',t:'list',wide:1},{k:'suitableFor',l:'Best for',t:'list'},{k:'keywords',l:'Search keywords',t:'list'}]],
+    ['Links',[{k:'mapRefs',l:'Places on the map',t:'multi',wide:1,o:()=>state.data.places.map(p=>opt(p.id,p.name))},{k:'areas',l:'Tourist Mode areas',t:'multi',wide:1,o:()=>REF.areas.map(a=>opt(a))}]]],
+  check(r,all){const o=[];idCheck(o,r,'id',all,'Activity ID');need(o,r,'name','Name');need(o,r,'description','Description');return o;}},
+transport:{label:'Transport providers',group:'Local business',one:'transport provider',key:'id',
+  hint:'Taxis, autos, rentals, transfers and guides in Getting Around and on the map. Real, active businesses only.',
+  title:r=>r.businessName,sub:r=>modeLabel(r.category),
+  cols:[['Areas',r=>(r.serviceAreas||[]).slice(0,3).join(' · ')],['Contact',r=>[r.phone,r.whatsapp?'WA':''].filter(Boolean).join(' · '),'num'],['Rating',r=>r.rating!=null&&r.rating!==''?'★ '+r.rating+(r.reviewCount?' ('+r.reviewCount+')':''):'—','num']],
+  pills:r=>[r.active===false?['Inactive','warn']:['Active','ok'],r.verified?['Verified','ok']:['Unverified','info'],r.featured?['Featured','warn']:null],
+  groups:[['Business',[{k:'id',l:'Provider ID',t:'text',req:1},{k:'businessName',l:'Business name',t:'text',req:1},{k:'category',l:'Type',t:'select',req:1,o:()=>REF.modes.map(m=>opt(m.id,m.label))},{k:'subcategory',l:'Service type',t:'text',hint:'e.g. Airport transfer, Self-drive'},{k:'shortDescription',l:'Short description',t:'text',wide:1},{k:'description',l:'Full description',t:'textarea',wide:1}]],
+    ['Contact',[{k:'phone',l:'Phone',t:'tel'},{k:'whatsapp',l:'WhatsApp',t:'tel',hint:'10-digit Indian mobile, or full international'},{k:'profileUrl',l:'Profile page',t:'url'},{k:'navigationUrl',l:'Directions link',t:'url'}]],
+    ['Where they work',[{k:'latitude',l:'Latitude',t:'number'},{k:'longitude',l:'Longitude',t:'number'},{k:'serviceAreas',l:'Service areas',t:'list',hint:'Sam, Khuri, Desert Camps… unlock desert filters'},{k:'serviceTags',l:'Service tags',t:'list'}]],
+    ['Trust & listing',[{k:'active',l:'Active (listed)',t:'bool'},{k:'verified',l:'Verified by Visit Jaisalmer',t:'bool',hint:'Only verified providers appear on the map'},{k:'featured',l:'Featured',t:'bool',hint:'Labelled “Featured”. Doesn’t change ranking.'},{k:'rating',l:'Rating (0–5)',t:'number'},{k:'reviewCount',l:'Review count',t:'number'},{k:'order',l:'Manual order',t:'number'},{k:'createdAt',l:'Listed on',t:'date'}]],
+    ['Images',[{k:'logo',l:'Logo URL',t:'url'},{k:'image',l:'Image URL',t:'url'}]]],
+  check(r,all){const o=[];idCheck(o,r,'id',all,'Provider ID');need(o,r,'businessName','Business name');
+    if(!REF.modes.some(m=>m.id===r.category))o.push(['err','Pick a transport type','category']);
+    contactCheck(o,r);llPair(o,r,'latitude','longitude');
+    if(!blank(r.rating)&&(r.rating<0||r.rating>5))o.push(['err','Rating must be between 0 and 5','rating']);
+    if(!blank(r.reviewCount)&&r.reviewCount<0)o.push(['err','Review count can’t be negative','reviewCount']);
+    ['profileUrl','navigationUrl','logo','image'].forEach(k=>{if(r[k]&&!linkOk(r[k]))o.push(['err','Must be https:// or a /path on your site',k]);});
+    if(!r.verified)o.push(['info','Not shown on the Smart Map until verified','verified']);
+    if(r.active===false)o.push(['info','Inactive — hidden everywhere','active']);
+    return o;}},
+operators:{label:'Activity operators',group:'Local business',one:'operator',key:'providerId',
+  hint:'Local operators who run camel safaris, boat rides and other experiences. Only “Approved” ones are shown.',
+  title:r=>r.providerName,sub:r=>r.location,
+  cols:[['Contact',r=>[r.phone,r.whatsapp?'WA':''].filter(Boolean).join(' · '),'num'],['Offers',r=>String(state.data.experiences.filter(e=>e.providerId===r.providerId).length),'num']],
+  pills:r=>[r.verificationStatus==='approved'?['Approved','ok']:r.verificationStatus==='rejected'?['Rejected','err']:['Pending','warn']],
+  groups:[['Operator',[{k:'providerId',l:'Operator ID',t:'text',req:1},{k:'providerName',l:'Business or person name',t:'text',req:1},{k:'serviceType',l:'Service type',t:'text'},{k:'location',l:'Based in',t:'text'},{k:'description',l:'About',t:'textarea',wide:1},{k:'verificationStatus',l:'Approval',t:'select',o:[opt('pending','Pending review'),opt('approved','Approved — shown on site'),opt('rejected','Rejected')]}]],
+    ['Contact',[{k:'phone',l:'Phone',t:'tel'},{k:'whatsapp',l:'WhatsApp',t:'tel'}]]],
+  check(r,all){const o=[];idCheck(o,r,'providerId',all,'Operator ID');need(o,r,'providerName','Name');contactCheck(o,r);
+    if(r.verificationStatus!=='approved')o.push(['info','Not shown publicly until approved','verificationStatus']);return o;}},
+experiences:{label:'Activity offers',group:'Local business',one:'offer',key:'experienceId',
+  hint:'A specific offer under an activity (e.g. Sunset Camel Safari), run by one operator.',
+  title:r=>r.title,sub:r=>{const a=state.data.activities.find(x=>x.id===r.activityId);const p=state.data.operators.find(x=>x.providerId===r.providerId);return (a?a.name:'?')+' · '+(p?p.providerName:'no operator');},
+  cols:[['Price',r=>r.price?'₹'+Number(r.price).toLocaleString('en-IN')+(r.priceUnit?' / '+r.priceUnit:''):'On enquiry','num'],['Duration',r=>r.duration]],
+  pills:r=>{const p=state.data.operators.find(x=>x.providerId===r.providerId);return [p&&p.verificationStatus==='approved'?['Live','ok']:['Operator not approved','warn']];},
+  groups:[['Offer',[{k:'experienceId',l:'Offer ID',t:'text',req:1},{k:'title',l:'Title',t:'text',req:1},{k:'activityId',l:'Activity',t:'select',req:1,o:()=>state.data.activities.map(a=>opt(a.id,a.name))},{k:'providerId',l:'Operator',t:'select',req:1,o:()=>state.data.operators.map(p=>opt(p.providerId,p.providerName))},{k:'description',l:'Description',t:'textarea',wide:1}]],
+    ['Price & timing',[{k:'price',l:'Price (₹)',t:'number',hint:'Leave empty for “Price on enquiry”'},{k:'priceUnit',l:'Per',t:'text',hint:'person, jeep, group…'},{k:'duration',l:'Duration',t:'text'},{k:'location',l:'Location',t:'text'},{k:'availableDays',l:'Days',t:'list'},{k:'availableTimes',l:'Times',t:'list',hint:'Morning, Sunset, Evening…'}]],
+    ['Extras',[{k:'pickupAvailable',l:'Hotel pickup',t:'tri'},{k:'privateOption',l:'Private option available',t:'bool'},{k:'mapRef',l:'Show on map at',t:'select',o:()=>[opt('','—')].concat(state.data.places.filter(p=>llOk(p.lat,p.lng)).map(p=>opt(p.id,p.name)))}]]],
+  check(r,all){const o=[];idCheck(o,r,'experienceId',all,'Offer ID');need(o,r,'title','Title');
+    if(!state.data.activities.some(a=>a.id===r.activityId))o.push(['err','Pick an activity','activityId']);
+    const p=state.data.operators.find(x=>x.providerId===r.providerId);
+    if(!p)o.push(['err','Pick an operator','providerId']);else if(p.verificationStatus!=='approved')o.push(['warn','Hidden: '+p.providerName+' isn’t approved yet','providerId']);
+    if(!blank(r.price)&&!(r.price>0))o.push(['err','Price must be more than 0, or empty','price']);
+    return o;}},
+sponsors:{label:'Sponsors',group:'Promotion',one:'sponsor',key:'id',
+  hint:'Paid local sponsors shown by the Smart Ad Manager. Always labelled “Sponsored”.',
+  title:r=>r.title,sub:r=>[r.category,r.location].filter(Boolean).join(' · '),
+  cols:[['Runs',r=>(r.startDate||'…')+' → '+(r.endDate||'…'),'num'],['Priority',r=>String(r.priority||0),'num']],
+  pills:r=>{const s=sponsorStatus(r);return [[s[0].toUpperCase()+s.slice(1),s==='active'?'ok':s==='expired'?'err':s==='paused'?'warn':'info']];},
+  groups:[['Sponsor',[{k:'id',l:'Sponsor ID',t:'text',req:1},{k:'title',l:'Headline',t:'text',req:1,hint:'Max 80 characters'},{k:'description',l:'Description',t:'textarea',wide:1,hint:'Max 240 characters'},{k:'category',l:'Category',t:'text'},{k:'location',l:'Location',t:'text'}]],
+    ['Link & media',[{k:'destinationUrl',l:'Destination link',t:'url',req:1,wide:1},{k:'ctaText',l:'Button text',t:'text'},{k:'sponsoredLabel',l:'Label',t:'select',o:[opt('Sponsored'),opt('Advertisement')]},{k:'image',l:'Image URL',t:'url'},{k:'logo',l:'Logo URL',t:'url'}]],
+    ['Schedule',[{k:'status',l:'Status',t:'select',o:['draft','scheduled','active','paused','expired'].map(s=>opt(s))},{k:'priority',l:'Priority',t:'number'},{k:'startDate',l:'Start date',t:'date'},{k:'endDate',l:'End date',t:'date'},{k:'placements',l:'Show at',t:'multi',wide:1,o:PLACEMENTS.map(p=>opt(p))}]]],
+  check(r,all){const o=[];idCheck(o,r,'id',all,'Sponsor ID');need(o,r,'title','Headline');
+    if(!httpsOk(r.destinationUrl||''))o.push(['err','Destination must be an https:// link, or the ad is rejected','destinationUrl']);
+    ['image','logo'].forEach(k=>{if(r[k]&&!httpsOk(r[k]))o.push(['err','Must start with https://',k]);});
+    const a=dayMs(r.startDate),b=dayMs(r.endDate);if(a&&b&&b<a)o.push(['err','End date is before start date','endDate']);
+    if((r.title||'').length>80)o.push(['warn','Headline is cut at 80 characters','title']);
+    if(blank(r.placements))o.push(['warn','No placements selected — it will show nowhere','placements']);
+    const s=sponsorStatus(r);if(s==='expired')o.push(['info','Campaign has ended','endDate']);
+    return o;}},
+houseAds:{label:'House promos',group:'Promotion',one:'promo',key:'id',
+  hint:'Visit Jaisalmer’s own promotions, shown as “From Visit Jaisalmer” when no sponsor fits.',
+  title:r=>r.title,sub:r=>r.target,cols:[['Button',r=>r.ctaText]],pills:()=>[['Live','ok']],
+  groups:[['Promo',[{k:'id',l:'Promo ID',t:'text',req:1},{k:'title',l:'Headline',t:'text',req:1},{k:'description',l:'Description',t:'textarea',wide:1},{k:'ctaText',l:'Button text',t:'text'},{k:'target',l:'Goes to',t:'text',hint:'A section link: #plan, #map, #transport'},{k:'placements',l:'Show at',t:'multi',wide:1,o:PLACEMENTS.map(p=>opt(p))}]]],
+  check(r,all){const o=[];idCheck(o,r,'id',all,'Promo ID');need(o,r,'title','Headline');
+    if(!/^#[a-z][\w-]*$/.test(r.target||''))o.push(['err','Must be a section link like #plan','target']);return o;}},
+partners:{label:'Partners strip',group:'Promotion',one:'partner',key:'_uid',
+  hint:'The scrolling “Local Partners” strip above the footer.',
+  title:r=>r.name,sub:r=>r.category,cols:[['Order',r=>String(r.order||''),'num']],
+  pills:r=>[r.active===false?['Off','warn']:['On','ok'],r.placeholder?['Demo','err']:null,r.verified?['Verified','ok']:null],
+  groups:[['Partner',[{k:'name',l:'Name',t:'text',req:1},{k:'category',l:'Category',t:'select',o:PARTNER_CATS.map(c=>opt(c))},{k:'url',l:'Website',t:'url'},{k:'logo',l:'Logo URL',t:'url',hint:'Optional. Without a logo the name is shown as text.'},{k:'order',l:'Order',t:'number'},{k:'active',l:'Show in strip',t:'bool'},{k:'verified',l:'Verified partner',t:'bool'},{k:'featured',l:'Featured',t:'bool'},{k:'placeholder',l:'Demo entry (not a real business)',t:'bool',wide:1}]]],
+  check(r){const o=[];need(o,r,'name','Name');
+    ['url','logo'].forEach(k=>{if(r[k]&&!httpsOk(r[k]))o.push(['err','Must start with https://',k]);});
+    if(r.placeholder&&r.active!==false&&settings().showPlaceholders)o.push(['warn','Demo partner is shown publicly — replace it or turn demo entries off in Settings','placeholder']);
+    return o;}},
+historyAudio:{label:'History audio',group:'Audio',one:'audio story',key:'_uid',
+  hint:'Narrated story for each place. Until a recording is published, the device voice reads the place text.',
+  title:r=>r.title||placeName(r.attractionId),sub:r=>placeName(r.attractionId)+' · '+(r.language==='hi'?'Hindi':'English'),
+  cols:[['Audio file',r=>r.audioUrl?r.audioUrl.split('/').pop():'—','num']],
+  pills:r=>[r.enabled===false?['Off','warn']:r.published?['Published','ok']:['Draft · voice','info'],r.transcript?['Transcript','info']:null],
+  groups:[['Story',[{k:'attractionId',l:'Place',t:'select',req:1,o:()=>state.data.places.map(p=>opt(p.id,p.name))},{k:'language',l:'Language',t:'select',o:[opt('en','English'),opt('hi','Hindi')]},{k:'title',l:'Title',t:'text',wide:1},{k:'audioUrl',l:'Audio file URL',t:'text',wide:1,hint:'e.g. assets/audio/history/en/kuldhara.mp3'},{k:'duration',l:'Length (seconds)',t:'number'},{k:'narrator',l:'Narrator',t:'text'}]],
+    ['Publishing',[{k:'enabled',l:'Enabled',t:'bool'},{k:'published',l:'Published (play the recording)',t:'bool'},{k:'transcript',l:'Transcript',t:'textarea',wide:1,hint:'Approved narration only. A blank line starts a new paragraph.'}]]],
+  check(r,all){const o=[];if(!state.data.places.some(p=>p.id===r.attractionId))o.push(['err','Pick a place','attractionId']);
+    if(all.some(x=>x!==r&&x.attractionId===r.attractionId&&x.language===r.language))o.push(['err','This place already has a story in this language','language']);
+    if(r.published&&!r.audioUrl)o.push(['err','Published but no audio file','audioUrl']);
+    if(r.audioUrl&&!audioOk(r.audioUrl))o.push(['err','Use an .mp3, .m4a, .ogg, .webm or .wav file','audioUrl']);
+    if(!r.published)o.push(['info','Draft — the device voice reads the place text instead','published']);
+    return o;}},
+guidance:{label:'Audio guide',group:'Audio',one:'guide clip',key:'id',
+  hint:'Website guidance clips in Hindi and English (separate from history stories).',
+  title:r=>r.title,sub:r=>r.section+' · '+r.triggerType,cols:[['Source',r=>r.sourceType==='file'?'Recording':'Device voice']],
+  pills:r=>[r.enabled===false?['Off','warn']:r.published===false?['Draft','info']:['Published','ok']],
+  groups:[['Clip',[{k:'id',l:'Clip ID',t:'text',req:1},{k:'title',l:'Title',t:'text',req:1},{k:'page',l:'Page',t:'text'},{k:'section',l:'Section',t:'text'},{k:'triggerType',l:'When it plays',t:'select',o:TRIGGERS.map(t=>opt(t))},{k:'sourceType',l:'Source',t:'select',o:[opt('tts','Device voice'),opt('file','Recording')]},{k:'order',l:'Order',t:'number'},{k:'enabled',l:'Enabled',t:'bool'},{k:'published',l:'Published',t:'bool'}]],
+    ['English',[{k:'language.en.text',l:'English text',t:'textarea',wide:1,req:1},{k:'language.en.audioUrl',l:'English recording URL',t:'text',wide:1}]],
+    ['हिन्दी',[{k:'language.hi.text',l:'Hindi text',t:'textarea',wide:1,req:1},{k:'language.hi.audioUrl',l:'Hindi recording URL',t:'text',wide:1}]]],
+  check(r,all){const o=[];idCheck(o,r,'id',all,'Clip ID');need(o,r,'title','Title');
+    if(!getP(r,'language.en.text'))o.push(['err','English text missing','language.en.text']);
+    if(!getP(r,'language.hi.text'))o.push(['err','Hindi text missing','language.hi.text']);
+    ['en','hi'].forEach(l=>{const u=getP(r,'language.'+l+'.audioUrl');if(u&&!audioOk(u))o.push(['err','Unsupported audio format','language.'+l+'.audioUrl']);});
+    if(r.sourceType==='file'&&!getP(r,'language.en.audioUrl')&&!getP(r,'language.hi.audioUrl'))o.push(['warn','Set to Recording but no file — falls back to device voice','sourceType']);
+    return o;}},
+settings:{label:'Settings',group:'Site',one:'settings',key:'_uid',single:true,
+  hint:'Feature switches, feeds, forms and map providers.',
+  groups:[['Features',[{k:'showPlaceholders',l:'Show demo partners in the strip',t:'bool',wide:1}]],
+    ['Forms',[{k:'newsletterEndpoint',l:'Newsletter endpoint',t:'url',wide:1,hint:'Server URL that accepts POST {"email"}'},{k:'addServiceEndpoint',l:'Add-service endpoint',t:'url',wide:1,hint:'Server URL that receives Add Your Service submissions. The form is always shown on this version of the site.'}]],
+    ['Data feeds',[{k:'transportFeed',l:'Transport providers feed',t:'text',wide:1,hint:'Where you host transport-providers.json, e.g. /data/transport-providers.json'},{k:'activityFeed',l:'Activity listings feed',t:'text',wide:1},{k:'historyAudioFeed',l:'History audio feed',t:'text',wide:1},{k:'guidanceFeed',l:'Audio guide feed',t:'text',wide:1},{k:'sponsorFeed',l:'Sponsors feed',t:'text',wide:1},{k:'mapDataFeed',l:'Map landmarks feed',t:'text',wide:1}]],
+    ['Map',[{k:'tiles',l:'Map tiles',t:'select',o:[opt('osm','OpenStreetMap public (testing only)'),opt('stadia','Stadia Maps'),opt('maptiler','MapTiler'),opt('mapbox','Mapbox'),opt('selfhosted','Self-hosted')]},{k:'routing',l:'Directions',t:'select',o:[opt('fossgis','FOSSGIS OSRM (non-commercial)'),opt('stadia','Stadia Maps'),opt('osrm','Self-hosted OSRM'),opt('mapbox','Mapbox'),opt('off','Off — Google/Apple links only')]},{k:'maptilerKey',l:'MapTiler key',t:'text'},{k:'mapboxToken',l:'Mapbox public token',t:'text',hint:'Publishable keys only. Restrict them to your domain.'}]],
+    ['Advertising',[{k:'adsEnabled',l:'Smart ads on',t:'bool'},{k:'googleEnabled',l:'Google ads (needs consent)',t:'bool'},{k:'maxAdsPerSession',l:'Max per visit',t:'number'},{k:'maxAdsPerDay',l:'Max per day',t:'number'},{k:'globalCooldownMinutes',l:'Minutes between ads',t:'number'},{k:'googleAdUnitPath',l:'Google ad unit path',t:'text',hint:'/1234567/your-unit'}]],
+    ['Social links',[{k:'socialYoutube',l:'YouTube',t:'url'},{k:'socialFacebook',l:'Facebook',t:'url'},{k:'socialInstagram',l:'Instagram',t:'url'},{k:'socialX',l:'X',t:'url'}]]],
+  check(r){const o=[];
+    ['newsletterEndpoint','addServiceEndpoint','socialYoutube','socialFacebook','socialInstagram','socialX'].forEach(k=>{if(r[k]&&!httpsOk(r[k]))o.push(['err','Must start with https://',k]);});
+    if(!r.addServiceEndpoint)o.push(['warn','“Add Your Service” is live on the site but has no endpoint — submissions are only checked, never sent','addServiceEndpoint']);
+    if(!r.newsletterEndpoint)o.push(['info','Newsletter signup is switched off on the site','newsletterEndpoint']);
+    if(r.tiles==='osm')o.push(['warn','Public OpenStreetMap tiles are for light use only — pick a provider before launch','tiles']);
+    if(r.routing==='fossgis')o.push(['warn','FOSSGIS routing is non-commercial and rate-limited','routing']);
+    if(r.routing==='mapbox'&&r.tiles!=='mapbox')o.push(['err','Mapbox directions may only be used with Mapbox tiles','routing']);
+    if(r.tiles==='maptiler'&&!r.maptilerKey)o.push(['err','MapTiler needs a key','maptilerKey']);
+    if((r.tiles==='mapbox'||r.routing==='mapbox')&&!r.mapboxToken)o.push(['err','Mapbox needs a public token','mapboxToken']);
+    if(r.googleEnabled&&!/^\/\d+\/\S+$/.test(r.googleAdUnitPath||''))o.push(['err','Ad unit path looks like /1234567/unit-name','googleAdUnitPath']);
+    return o;}}
+};
+const ORDER=['places','landmarks','activities','transport','operators','experiences','sponsors','houseAds','partners','historyAudio','guidance','settings'];
+function need(o,r,k,l){if(blank(r[k]))o.push(['err',l+' is required',k]);}
+function idCheck(o,r,k,all,l){const v=r[k];if(blank(v))o.push(['err',l+' is required',k]);else if(!ID_RE.test(v))o.push(['err',l+' can only use letters, numbers, - _ .',k]);else if(all.some(x=>x!==r&&x[k]===v))o.push(['err',l+' “'+v+'” is already used',k]);}
+function contactCheck(o,r){if(r.phone&&!telOk(r.phone))o.push(['err','Phone needs 7–15 digits','phone']);if(r.whatsapp&&!waOk(r.whatsapp))o.push(['err','WhatsApp needs a 10-digit mobile or full international number','whatsapp']);if(!r.phone&&!r.whatsapp)o.push(['warn','No phone or WhatsApp — visitors can’t contact them','phone']);}
+function llPair(o,r,a,b){if(blank(r[a])&&blank(r[b]))return o.push(['info','No map location — listed but not pinned',a]);if(!llOk(r[a],r[b]))o.push(['err','Coordinates are out of range',a]);}
+function sponsorStatus(r){const s=r.status||'draft';if(s!=='active'&&s!=='scheduled')return s;const t=Date.now(),a=dayMs(r.startDate),b=dayMs(r.endDate);if(a&&t<a)return 'scheduled';if(b&&t>=b+864e5)return 'expired';return 'active';}
+function placeName(id){const p=state.data.places.find(x=>x.id===id);return p?p.name:(id||'—');}
+function modeLabel(id){const m=REF.modes.find(x=>x.id===id);return m?m.label:'—';}
+const settings=()=>state.data.settings[0]||{};
+
+/* ================= state + storage ================= */
+const state={data:clone(DEFAULTS),source:{},view:'dashboard',q:'',filter:'all',db:null,canWrite:true,mode:'loading',saved:{},editing:null};
+ORDER.forEach(k=>state.source[k]='default');
+const LS='vj_admin_v1';
+function lsLoad(){try{const v=JSON.parse(localStorage.getItem(LS)||'null');if(v&&typeof v==='object')ORDER.forEach(k=>{if(Array.isArray(v[k]&&v[k].items)){state.data[k]=v[k].items;state.source[k]='device';state.saved[k]=v[k].updatedAt;}});}catch(e){}}
+function lsSave(){try{const o={};ORDER.forEach(k=>{if(state.source[k]!=='default')o[k]={items:state.data[k],updatedAt:state.saved[k]};});localStorage.setItem(LS,JSON.stringify(o));return true;}catch(e){return false;}}
+const writing={};
+async function persist(key){
+  const at=new Date().toISOString();state.saved[key]=at;
+  if(state.db){
+    while(writing[key])await writing[key];
+    const p=state.db.doc('datasets/'+key).set({items:state.data[key],updatedAt:at});writing[key]=p;
+    try{await p;state.source[key]='workspace';state.mode='synced';}
+    catch(e){state.mode='error';renderTop();toast(e&&e.code==='quota_exceeded'?'Storage is full. Delete unused records and try again.':e&&e.code==='invalid_argument'?'You can view this admin but not change it.':'Couldn’t save. Check your connection and try again.');throw e;}
+    finally{if(writing[key]===p)writing[key]=null;}
+  }else{state.source[key]='device';if(!lsSave()){toast('This browser blocked saving. Use Publish to site to keep your work.');}}
+  renderNav();renderTop();
+}
+async function connect(){
+  lsLoad();
+  const c=window.claude;if(!c||!c.use){state.mode='local';render();return;}
+  const [db,user]=await Promise.all([c.use('db').catch(()=>null),c.use('user').catch(()=>null)]);
+  if(user){try{const w=await user.can('data.write');if(w===false)state.canWrite=false;}catch(e){}}
+  if(!db){state.mode='local';render();return;}
+  state.db=db;state.mode='synced';
+  ORDER.forEach(k=>{
+    db.doc('datasets/'+k).onSnapshot(s=>{
+      if(s.exists){const d=s.data();if(Array.isArray(d.items)){state.data[k]=clone(d.items);state.source[k]='workspace';state.saved[k]=d.updatedAt;}}
+      if(!state.editing)render();else{renderNav();renderTop();}
+    },()=>{state.mode='error';renderTop();});
+  });
+  render();
+}
+
+/* ================= exports (exact shapes the website reads) ================= */
+const strip=r=>{const o=clone(r);delete o._uid;return o;};
+const clean=o=>{Object.keys(o).forEach(k=>{if(o[k]===''||o[k]==null||(Array.isArray(o[k])&&!o[k].length))delete o[k];});return o;};
+const js=(name,v)=>'const '+name+' = '+JSON.stringify(v,null,2)+';\n';
+function placesToSite(){
+  const A=[],G={};
+  state.data.places.forEach(p=>{
+    const a={id:p.id,name:p.name,tag:p.tag,short:p.short,youtubeUrl:p.youtubeUrl||'',why:p.why,see:p.see||[],bestTime:p.bestTime,location:p.location,distance:p.distance,nearby:p.nearby||[],tips:p.tips};
+    if(p.ticketText||p.ticketUrl)a.ticket=clean({text:p.ticketText,url:p.ticketUrl});
+    if(p.timing)a.timing=p.timing;if(p.address)a.address=p.address;
+    const c=clean({phone:p.phone,whatsapp:p.whatsapp,website:p.website,email:p.email});if(Object.keys(c).length)a.contact=c;
+    if(p.services&&p.services.length)a.services=p.services;if(p.visible===false)a.visible=false;
+    A.push(a);if(llOk(p.lat,p.lng))G[p.id]={ll:[p.lat,p.lng],cat:p.mapCategory||'attractions',sub:p.mapSub||''};
+  });return {A,G};
+}
+function outputs(){
+  const s=settings(),d=state.data,P=placesToSite();
+  const acts=d.activities.map(strip);
+  return [
+    {id:'transport',file:'transport-providers.json',title:'Transport providers',ds:['transport'],
+     where:'Host it and set <code>TRANSPORT_FEED.url</code> (or paste the list into <code>TRANSPORT_PROVIDERS</code>).',
+     text:()=>JSON.stringify({providers:d.transport.filter(r=>r.active!==false).map(r=>clean(strip(r)))},null,2)},
+    {id:'activity',file:'activity-listings.json',title:'Activity operators & offers',ds:['operators','experiences'],
+     where:'Host it and set <code>ACTIVITY_FEED.url</code>. Only approved operators appear on the site.',
+     text:()=>JSON.stringify({providers:d.operators.map(r=>clean(strip(r))),experiences:d.experiences.map(r=>{const o=clean(strip(r));if(r.pickupAvailable===true||r.pickupAvailable===false)o.pickupAvailable=r.pickupAvailable;return o;})},null,2)},
+    {id:'sponsors',file:'sponsors.json',title:'Sponsors',ds:['sponsors'],
+     where:'Host it and set <code>SMART_AD_CONFIG.providers.sponsor.feedUrl</code>.',
+     text:()=>JSON.stringify({sponsors:d.sponsors.map(r=>clean(strip(r)))},null,2)},
+    {id:'history',file:'history-audio.json',title:'History audio',ds:['historyAudio'],
+     where:'Host it and set <code>HISTORY_AUDIO_FEED.url</code>, or paste it as <code>HISTORY_AUDIO</code>.',
+     text:()=>JSON.stringify({records:d.historyAudio.map(r=>Object.assign(strip(r),{type:'history'}))},null,2)},
+    {id:'guidance',file:'audio-guidance.json',title:'Audio guide clips',ds:['guidance'],
+     where:'Host it and set <code>AUDIO_GUIDANCE_FEED.url</code>.',
+     text:()=>JSON.stringify({records:d.guidance.map(strip)},null,2)},
+    {id:'landmarks',file:'map-locations.json',title:'Map landmarks',ds:['landmarks'],
+     where:'Replace <code>CURATED_PLACES</code> in the map script with this list (a feed would duplicate the built-in ones).',
+     text:()=>js('CURATED_PLACES',d.landmarks.map(r=>clean(strip(r))))},
+    {id:'places',file:'places.js',title:'Places (Explore + map pins)',ds:['places'],
+     where:'Replace <code>ATTRACTIONS</code> in the first data script, and <code>ATTRACTION_GEO</code> in the map script.',
+     text:()=>js('ATTRACTIONS',P.A)+'\n'+js('ATTRACTION_GEO',P.G)},
+    {id:'activities',file:'things-to-do.js',title:'Things to do',ds:['activities'],
+     where:'Replace <code>ACTIVITIES</code> and <code>ACTIVITY_INFO</code>.',
+     text:()=>{const info={};acts.forEach(a=>{const o=clone(a);delete o.id;delete o.name;delete o.cat;info[a.id]=o;});return js('ACTIVITIES',acts.map(a=>({id:a.id,name:a.name,cat:a.cat})))+'\n'+js('ACTIVITY_INFO',info);}},
+    {id:'promo',file:'promotions.js',title:'House promos & partners',ds:['houseAds','partners'],
+     where:'Replace <code>HOUSE_ADS</code>, <code>FEATURED_BRANDS</code> and <code>PARTNERS_CONFIG</code>.',
+     text:()=>js('HOUSE_ADS',d.houseAds.map(strip))+'\n'+js('PARTNERS_CONFIG',{showPlaceholders:!!s.showPlaceholders})+js('FEATURED_BRANDS',d.partners.map(strip))},
+    {id:'settings',file:'site-settings.js',title:'Site settings',ds:['settings'],
+     where:'Each line names the setting in your page to replace.',
+     text:()=>[
+      '// Newsletter and Add Your Service forms\nconst NEWSLETTER = { endpoint: '+JSON.stringify(s.newsletterEndpoint||'')+', timeoutMs: 10000 };\nconst ADD_SERVICE_API = { endpoint: '+JSON.stringify(s.addServiceEndpoint||'')+', timeoutMs: 10000 };',
+      '// Data feeds\nconst TRANSPORT_FEED = {url:'+JSON.stringify(s.transportFeed||null)+'};\nconst ACTIVITY_FEED = {url:'+JSON.stringify(s.activityFeed||null)+'};\nconst HISTORY_AUDIO_FEED = {url:'+JSON.stringify(s.historyAudioFeed||null)+'};\nconst AUDIO_GUIDANCE_FEED = {url:'+JSON.stringify(s.guidanceFeed||null)+'};\n// MAP_CONFIG.data.url = '+JSON.stringify(s.mapDataFeed||null)+';\n// SMART_AD_CONFIG.providers.sponsor.feedUrl = '+JSON.stringify(s.sponsorFeed||null)+';',
+      '// Map providers (map script)\nconst ACTIVE_PROVIDERS = {tiles:'+JSON.stringify(s.tiles)+', routing:'+JSON.stringify(s.routing)+'};'+(s.maptilerKey?'\n// TILE_PROVIDERS.maptiler.url: replace YOUR_MAPTILER_KEY with '+s.maptilerKey:'')+(s.mapboxToken?'\n// TILE_PROVIDERS.mapbox / ROUTING_PROVIDERS.mapbox: replace YOUR_MAPBOX_PUBLIC_TOKEN with '+s.mapboxToken:''),
+      '// SMART_AD_CONFIG\n// enabled: '+!!s.adsEnabled+'\n// frequency: { maxAdsPerSession: '+(s.maxAdsPerSession||3)+', maxAdsPerDay: '+(s.maxAdsPerDay||6)+', globalCooldownMinutes: '+(s.globalCooldownMinutes||10)+' }\n// providers.google: { enabled: '+!!s.googleEnabled+', adUnitPath: '+JSON.stringify(s.googleAdUnitPath||'')+' }',
+      '// Footer social links\nconst SOCIAL_LINKS = '+JSON.stringify({youtube:s.socialYoutube||'',facebook:s.socialFacebook||'',instagram:s.socialInstagram||'',x:s.socialX||''})+';'
+     ].join('\n\n')}
+  ];
+}
+
+/* ================= issue scan ================= */
+function allIssues(){const out=[];ORDER.forEach(k=>{const list=state.data[k];list.forEach(r=>DS[k].check(r,list).forEach(i=>out.push({k,r,lvl:i[0],msg:i[1]})));});return out;}
+const rank={err:0,warn:1,info:2};
+
+/* ================= rendering ================= */
+function render(){renderNav();renderTop();renderMain();}
+function renderNav(){
+  const iss=allIssues(),bad={};iss.forEach(i=>{if(i.lvl==='err')bad[i.k]=1;});
+  const groups={};ORDER.forEach(k=>(groups[DS[k].group]=groups[DS[k].group]||[]).push(k));
+  let h='<div class="nav-group">'+navBtn('dashboard','Overview','')+navBtn('addService','Add a service','')+navBtn('publish','Publish to site','')+'</div>';
+  Object.keys(groups).forEach(g=>{h+='<div class="nav-group"><span class="nav-label">'+esc(g)+'</span>'+groups[g].map(k=>navBtn(k,DS[k].label,DS[k].single?'':state.data[k].length,bad[k])).join('')+'</div>';});
+  $('#nav').innerHTML=h;
+}
+function navBtn(v,l,c,bad){return '<button type="button" data-go="'+v+'"'+(state.view===v?' aria-current="page"':'')+'><span>'+esc(l)+'</span>'+(bad?'<span class="dot" title="Has errors" aria-label="has errors"></span>':'<span class="cnt">'+c+'</span>')+'</button>';}
+function syncPill(){
+  if(state.mode==='loading')return '<span class="sync">Connecting…</span>';
+  if(state.mode==='error')return '<span class="sync err">Last save failed</span>';
+  if(state.mode==='synced')return '<span class="sync ok">Saved to workspace</span>';
+  return '<span class="sync warn">Saved in this browser only</span>';
+}
+function renderTop(){const n=document.getElementById('syncSlot');if(n)n.innerHTML=syncPill();}
+function head(title,sub,actions){return '<header class="top"><div><h1>'+esc(title)+'</h1>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div><div class="top-end"><span id="syncSlot">'+syncPill()+'</span>'+(actions||'')+'</div></header>';}
+function banners(){let h='';
+  if(!state.canWrite)h+='<div class="banner info"><div><b>View only</b>You can browse and export, but only editors can change content.</div></div>';
+  if(state.mode==='local')h+='<div class="banner warn"><div><b>Saved in this browser only</b>Edits stay in this browser on this device. Use “Download everything” as a backup, and “Restore a backup” to move your work to another device.</div></div>';
+  return h;}
+function renderMain(){
+  const m=$('#main');
+  if(state.view==='dashboard')m.innerHTML=dashboard();
+  else if(state.view==='publish')m.innerHTML=publish();
+  else if(state.view==='addService')m.innerHTML=addServiceView();
+  else if(DS[state.view].single)m.innerHTML=settingsView();
+  else m.innerHTML=listView(state.view);
+}
+function dashboard(){
+  const d=state.data,iss=allIssues().sort((a,b)=>rank[a.lvl]-rank[b.lvl]);
+  const live=d.places.filter(p=>p.visible!==false).length,pinned=d.places.filter(p=>llOk(p.lat,p.lng)).length;
+  const tv=d.transport.filter(t=>t.verified&&t.active!==false).length;
+  const ops=d.operators.filter(o=>o.verificationStatus==='approved').length;
+  const sp=d.sponsors.filter(s=>sponsorStatus(s)==='active').length;
+  const ha=d.historyAudio.filter(h=>h.published).length;
+  const demo=d.partners.filter(p=>p.placeholder&&p.active!==false).length;
+  const tile=(v,k,val,s)=>'<button type="button" class="tile" data-go="'+v+'"><span class="k">'+k+'</span><span class="v">'+val+'</span><span class="s">'+s+'</span></button>';
+  const errs=iss.filter(i=>i.lvl==='err').length,warns=iss.filter(i=>i.lvl==='warn').length;
+  const list=iss.filter(i=>i.lvl!=='info').slice(0,30);
+  return head('Overview','What visitors see on Visit Jaisalmer right now, and what needs fixing.',(state.canWrite?'<button type="button" class="btn" data-go="addService">+ Add a service</button>':'')+'<button type="button" class="btn primary" data-go="publish">Publish to site</button>')+banners()+
+  '<div class="tiles">'+
+    tile('places','Places',live,pinned+' pinned on the map')+
+    tile('transport','Transport',d.transport.length,tv+' verified · on the map')+
+    tile('operators','Activity operators',d.operators.length,ops+' approved · '+d.experiences.length+' offers')+
+    tile('sponsors','Sponsors live',sp,d.sponsors.length+' in total')+
+    tile('historyAudio','History audio',ha+' / '+d.historyAudio.length,'recordings published')+
+    tile('partners','Partners strip',d.partners.filter(p=>p.active!==false).length,demo?demo+' demo entries showing':'all real businesses')+
+  '</div>'+
+  '<section class="sec-h"><h2>Needs attention</h2><p>'+(errs||warns?errs+' error'+(errs===1?'':'s')+' · '+warns+' warning'+(warns===1?'':'s'):'Nothing to fix.')+'</p></section>'+
+  (list.length?'<ul class="issues">'+list.map(i=>'<li><button type="button" data-open="'+i.k+'" data-uid="'+esc(i.r._uid)+'"><span class="pill '+i.lvl+'">'+(i.lvl==='err'?'Error':'Check')+'</span><span class="t"><b>'+esc(DS[i.k].single?'Settings':(DS[i.k].title(i.r)||'Untitled'))+'</b> <span>— '+esc(i.msg)+'</span></span><span class="ds hide-sm">'+esc(DS[i.k].label)+'</span></button></li>').join('')+'</ul>':'<div class="issues"><p class="empty-note">Every record passes the same checks the website runs.</p></div>');
+}
+function listView(k){
+  const ds=DS[k],all=state.data[k],q=state.q.trim().toLowerCase();
+  const withIss=all.map(r=>({r,iss:ds.check(r,all)}));
+  let rows=withIss.filter(x=>!q||JSON.stringify(x.r).toLowerCase().includes(q));
+  if(state.filter==='issues')rows=rows.filter(x=>x.iss.some(i=>i.lvl!=='info'));
+  const src=state.source[k]==='default'?'<span class="pill info">Showing website defaults — not yet saved here</span>':'<span>Last saved '+esc(fmtTime(state.saved[k]))+'</span>';
+  const cols=ds.cols||[];
+  const body=rows.length?rows.map(x=>{const r=x.r,e=x.iss.filter(i=>i.lvl==='err').length,w=x.iss.filter(i=>i.lvl==='warn').length;
+    const pills=(ds.pills(r)||[]).filter(Boolean).map(p=>'<span class="pill '+p[1]+'">'+esc(p[0])+'</span>').join('')+(e?'<span class="pill err">'+e+' error'+(e>1?'s':'')+'</span>':w?'<span class="pill warn">'+w+' warning'+(w>1?'s':'')+'</span>':'');
+    return '<tr data-uid="'+esc(r._uid)+'" tabindex="0"><td class="name"><b>'+esc(ds.title(r)||'Untitled')+'</b><span>'+esc(ds.sub(r)||'')+'</span></td>'+cols.map(c=>'<td class="'+(c[2]||'')+' hide-sm">'+esc(c[1](r)||'—')+'</td>').join('')+'<td><div class="pills">'+pills+'</div></td></tr>';}).join('')
+    :'<tr><td colspan="'+(cols.length+2)+'" class="empty-note">'+(all.length?'No matches.':'No '+ds.one+'s yet. '+(k==='transport'||k==='operators'||k==='sponsors'?'Only add real, active businesses — the website never shows placeholders here.':''))+'</td></tr>';
+  return head(ds.label,esc(ds.hint),state.canWrite?'<button type="button" class="btn primary" data-new="'+k+'">+ Add '+esc(ds.one)+'</button>':'')+banners()+
+  '<div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><span class="vh">Search '+esc(ds.label)+'</span><input id="q" type="search" placeholder="Search '+esc(ds.label.toLowerCase())+'" value="'+esc(state.q)+'"></label>'+
+  '<div class="seg" role="group" aria-label="Filter"><button type="button" data-filter="all" aria-pressed="'+(state.filter==='all')+'">All '+all.length+'</button><button type="button" data-filter="issues" aria-pressed="'+(state.filter==='issues')+'">Needs attention '+withIss.filter(x=>x.iss.some(i=>i.lvl!=='info')).length+'</button></div></div>'+
+  '<div class="tablewrap"><table><thead><tr><th>'+esc(ds.one[0].toUpperCase()+ds.one.slice(1))+'</th>'+cols.map(c=>'<th class="hide-sm">'+esc(c[0])+'</th>').join('')+'<th>Status</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+  '<div class="ds-foot">'+src+'<button type="button" class="btn ghost sm" data-go="publish">Get the file for the site →</button></div>';
+}
+function fmtTime(t){if(!t)return 'never';const d=new Date(t);return isNaN(d)?'—':d.toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
+function settingsView(){
+  const r=settings(),iss=DS.settings.check(r,[r]);
+  return head('Settings',esc(DS.settings.hint),'')+banners()+
+  '<form class="tablewrap" id="settingsForm" style="padding:20px;display:flex;flex-direction:column;gap:22px" novalidate>'+issuesHtml(iss)+formHtml('settings',r,iss)+
+  (state.canWrite?'<div><button type="submit" class="btn primary">Save settings</button></div>':'')+'</form>';
+}
+function publish(){
+  const outs=outputs(),iss=allIssues();
+  return head('Publish to site','Your website reads these files. Download or copy each one and put it where it says.',(state.canWrite?'<label class="btn" for="importFile">Restore a backup</label><input type="file" id="importFile" accept=".json,application/json" hidden>':'')+'<button type="button" class="btn primary" id="dlAll">Download everything</button>')+banners()+
+  '<div class="banner info"><div><b>How publishing works</b>JSON files go on your web host (for example <span class="mono">/data/transport-providers.json</span>); then set the matching feed address in Settings and copy the settings file into the page. The other files replace one block of data in your page.</div></div>'+
+  '<div class="outs">'+outs.map(o=>{const e=iss.filter(i=>o.ds.includes(i.k)&&i.lvl==='err').length;const t=o.text();
+    return '<article class="out"><div class="out-h"><h3>'+esc(o.title)+' '+(e?'<span class="pill err">'+e+' error'+(e>1?'s':'')+' skipped by the site</span>':'<span class="pill ok">Ready</span>')+'</h3><p>'+o.where+'</p></div><pre tabindex="0" aria-label="'+esc(o.file)+'">'+esc(t.length>6000?t.slice(0,6000)+'\n…':t)+'</pre>'+
+    '<div class="out-f"><button type="button" class="btn sm primary" data-dl="'+o.id+'">Download</button><button type="button" class="btn sm" data-copy="'+o.id+'">Copy</button><span class="meta">'+esc(o.file)+' · '+(t.length/1024).toFixed(1)+' KB</span></div></article>';}).join('')+'</div>';
+}
+
+/* ================= add a service (no OTP — added by an admin) =================
+   Same choices as the website's “Add Your Service” form. Transport types become transport providers;
+   everything else becomes an activity operator. */
+const SERVICE_TYPES=[
+  ['Local Guide','transport','guide'],['Photographer','operator',null,'reel-photographer'],['Taxi Driver','transport','taxi'],['Auto Driver','transport','auto'],
+  ['Camel Safari Provider','operator',null,'camel-safari'],['Jeep Safari Provider','operator',null,'jeep-safari'],['Bike/Scooty Rental','transport','bike'],
+  ['Car Rental','transport','car'],['Airport / Desert Transfer','transport','transfers'],['Local Tour Operator','operator'],['Activity Provider','operator'],['Other tourism-related service','operator']];
+const svcForm={type:'',vehicle:'bike',last:null,err:{}};
+function slugId(name,taken){let b=String(name).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'service';let id=b,i=2;while(taken.has(id))id=b+'-'+(i++);return id;}
+function mobileOwner(m){const d=String(m).replace(/\D/g,'').slice(-10);if(d.length!==10)return null;
+  const hit=(list,k,nk)=>list.find(r=>[r.phone,r.whatsapp].some(v=>v&&String(v).replace(/\D/g,'').slice(-10)===d));
+  const t=hit(state.data.transport);if(t)return {k:'transport',r:t,name:t.businessName};
+  const o=hit(state.data.operators);if(o)return {k:'operators',r:o,name:o.providerName};return null;}
+function addServiceView(){
+  const T=SERVICE_TYPES.find(x=>x[0]===svcForm.type),e=svcForm.err,L=svcForm.last;
+  const fe=k=>e[k]?'<span class="msg err">'+esc(e[k])+'</span>':'';
+  const goes=!T?'Choose a service type to see where it will be listed.':T[1]==='transport'?'Listed in Getting Around and on the Smart Map as a '+esc(modeLabel(T[2]==='bike'?svcForm.vehicle:T[2]).toLowerCase())+'.':'Listed as an activity operator'+(T[3]?' — you can add their '+esc((state.data.activities.find(a=>a.id===T[3])||{}).name||'')+' offer next':'')+'.';
+  const recent=[].concat(state.data.transport.filter(r=>r.addedBy==='admin').map(r=>({k:'transport',r,n:r.businessName,t:modeLabel(r.category),live:r.verified})),
+    state.data.operators.filter(r=>r.addedBy==='admin').map(r=>({k:'operators',r,n:r.providerName,t:r.serviceType||'Activity operator',live:r.verificationStatus==='approved'})))
+    .sort((a,b)=>String(b.r.createdAt||'').localeCompare(String(a.r.createdAt||''))).slice(0,8);
+  return head('Add a service','Add a local guide, driver, rental or safari operator yourself. No OTP — you’re vouching for the number.','')+banners()+
+  (L?'<div class="banner info" role="status"><div><b>Added '+esc(L.name)+'</b>'+esc(L.where)+'</div><div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn sm" data-open="'+L.k+'" data-uid="'+esc(L.uid)+'">Open listing</button>'+(L.activity?'<button type="button" class="btn sm primary" data-add-offer="'+esc(L.uid)+'">Add their offer</button>':'')+'</div></div>':'')+
+  (state.canWrite?'<form class="tablewrap" id="addServiceForm" style="padding:20px;display:flex;flex-direction:column;gap:20px;max-width:760px" novalidate>'+
+   '<fieldset><legend>Service</legend>'+
+    '<div class="f wide'+(e.name?' bad':'')+'"><label for="sv_name">Name *</label><input id="sv_name" type="text" autocomplete="off" maxlength="80" placeholder="Business or person name">'+fe('name')+'</div>'+
+    '<div class="f'+(e.type?' bad':'')+'"><label for="sv_type">Service type *</label><select id="sv_type"><option value="">Select a service</option>'+SERVICE_TYPES.map(t=>'<option'+(t[0]===svcForm.type?' selected':'')+'>'+esc(t[0])+'</option>').join('')+'</select>'+fe('type')+'</div>'+
+    (T&&T[2]==='bike'?'<div class="f"><label for="sv_vehicle">Vehicles</label><select id="sv_vehicle"><option value="bike"'+(svcForm.vehicle==='bike'?' selected':'')+'>Bikes</option><option value="scooty"'+(svcForm.vehicle==='scooty'?' selected':'')+'>Scooties</option></select></div>':'<div class="f"></div>')+
+    '<div class="f wide"><span class="hint">'+goes+'</span></div>'+
+   '</fieldset><fieldset><legend>Contact</legend>'+
+    '<div class="f'+(e.mobile?' bad':'')+'"><label for="sv_mobile">Mobile number *</label><div style="display:flex;gap:6px"><span class="btn" aria-hidden="true" style="pointer-events:none">+91</span><input id="sv_mobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" autocomplete="off"></div>'+fe('mobile')+'</div>'+
+    '<div class="f"><span style="font-size:.8rem;font-weight:600">WhatsApp</span><label class="chk"><input type="checkbox" id="sv_wa" checked> Same number is on WhatsApp</label></div>'+
+    '<div class="f wide"><label for="sv_areas">Areas covered</label><input id="sv_areas" type="text" placeholder="e.g. Fort area, Sam, Khuri, Airport"><span class="hint">Separate with commas. Sam, Khuri and Desert Camps unlock the desert filters.</span></div>'+
+   '</fieldset><fieldset><legend>Details</legend>'+
+    '<div class="f wide'+(e.desc?' bad':'')+'"><label for="sv_desc">About the service *</label><textarea id="sv_desc" rows="4" placeholder="Areas covered, vehicle/equipment, pricing, languages spoken…"></textarea>'+fe('desc')+'</div>'+
+    '<div class="f wide"><label class="chk"><input type="checkbox" id="sv_ok"> I’ve checked this business — show it on the website now</label><span class="hint">Leave unticked to save it as pending (unverified / not approved) and review it later.</span></div>'+
+   '</fieldset><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn primary">Add service</button><button type="reset" class="btn">Clear</button></div></form>':'')+
+  '<section class="sec-h"><h2>Recently added here</h2><p>'+(recent.length?'':'Services you add on this page will appear here.')+'</p></section>'+
+  (recent.length?'<ul class="issues">'+recent.map(x=>'<li><button type="button" data-open="'+x.k+'" data-uid="'+esc(x.r._uid)+'"><span class="pill '+(x.live?'ok':'warn')+'">'+(x.live?'Live':'Pending')+'</span><span class="t"><b>'+esc(x.n)+'</b> <span>— '+esc(x.t)+'</span></span><span class="ds hide-sm">'+esc(fmtTime(x.r.createdAt))+'</span></button></li>').join('')+'</ul>':'');
+}
+async function submitAddService(f){
+  const v=id=>(f.querySelector('#'+id)||{}).value||'';
+  const name=v('sv_name').trim(),type=v('sv_type'),mob=v('sv_mobile').replace(/\D/g,''),desc=v('sv_desc').trim();
+  const areas=v('sv_areas').split(',').map(x=>x.trim()).filter(Boolean),wa=f.querySelector('#sv_wa').checked,ok=f.querySelector('#sv_ok').checked;
+  const e={};if(!name)e.name='Enter a name.';if(!type)e.type='Choose a service type.';
+  if(!/^[6-9]\d{9}$/.test(mob))e.mobile='Enter a valid 10-digit Indian mobile number.';
+  else{const own=mobileOwner(mob);if(own)e.mobile='This number is already listed for '+own.name+'.';}
+  if(!desc)e.desc='Add a short description.';
+  svcForm.type=type;svcForm.err=e;
+  if(Object.keys(e).length){const keep={name,mob,areas:v('sv_areas'),desc,wa,ok};renderMain();restore(keep);toast('Fix '+Object.keys(e).length+' field'+(Object.keys(e).length>1?'s':'')+' first.');const b=$('#addServiceForm .f.bad input,#addServiceForm .f.bad select,#addServiceForm .f.bad textarea');if(b)b.focus();return;}
+  const T=SERVICE_TYPES.find(x=>x[0]===type),now=new Date().toISOString(),phone='+91'+mob,short=desc.length>140?desc.slice(0,137).trim()+'…':desc;
+  let k,rec;
+  if(T[1]==='transport'){
+    k='transport';
+    rec={_uid:newUid(),id:slugId(name,new Set(state.data.transport.map(r=>r.id))),businessName:name,category:T[2]==='bike'?svcForm.vehicle:T[2],subcategory:type,
+      shortDescription:short,description:desc,phone,whatsapp:wa?mob:'',serviceAreas:areas,serviceTags:[],active:true,verified:ok,featured:false,createdAt:now,addedBy:'admin'};
+  }else{
+    k='operators';
+    rec={_uid:newUid(),providerId:slugId(name,new Set(state.data.operators.map(r=>r.providerId))),providerName:name,phone,whatsapp:wa?mob:'',location:areas.join(', '),
+      serviceType:type,description:desc,verificationStatus:ok?'approved':'pending',createdAt:now,addedBy:'admin'};
+  }
+  const prev=clone(state.data[k]);state.data[k].push(rec);
+  try{await persist(k);}catch(x){state.data[k]=prev;return;}
+  const live=ok?'It’s live on the website once you publish the '+(k==='transport'?'transport-providers.json':'activity-listings.json')+' file.':'Saved as pending — tick “'+(k==='transport'?'Verified':'Approved')+'” on the listing when you’ve checked it.';
+  svcForm.last={k,uid:rec._uid,name,activity:T[3]||null,where:(k==='transport'?'Added to Transport providers. ':'Added to Activity operators. ')+live};
+  svcForm.err={};svcForm.type='';renderMain();toast('Added '+name);
+}
+function restore(o){const f=$('#addServiceForm');if(!f)return;f.querySelector('#sv_name').value=o.name;f.querySelector('#sv_mobile').value=o.mob;f.querySelector('#sv_areas').value=o.areas;f.querySelector('#sv_desc').value=o.desc;f.querySelector('#sv_wa').checked=o.wa;f.querySelector('#sv_ok').checked=o.ok;}
+function addOfferFor(uid){
+  const op=state.data.operators.find(r=>r._uid===uid);if(!op)return;
+  const T=SERVICE_TYPES.find(x=>x[0]===op.serviceType),act=T&&T[3];
+  const d=blankRecord('experiences');d.providerId=op.providerId;if(act)d.activityId=act;
+  d.experienceId=slugId(op.providerId+'-'+(act||'offer'),new Set(state.data.experiences.map(r=>r.experienceId)));
+  d.title=((state.data.activities.find(a=>a.id===act)||{}).name||'')+(act?' with '+op.providerName:'');
+  lastFocus=document.activeElement;state.editing={k:'experiences',uid:d._uid,isNew:true,draft:d,confirm:false};drawRender();
+}
+
+/* ================= form engine ================= */
+function issuesHtml(iss){const g=iss.filter(i=>!i[2]);return g.length?'<div class="rec-issues">'+g.map(i=>'<div class="'+i[0]+'">'+esc(i[1])+'</div>').join('')+'</div>':'';}
+function formHtml(k,r,iss){
+  const ds=DS[k],byF={};iss.forEach(i=>{if(i[2]&&(!byF[i[2]]||rank[i[0]]<rank[byF[i[2]][0]]))byF[i[2]]=i;});
+  const ro=!state.canWrite?' disabled':'';
+  return ds.groups.map(([g,fs])=>'<fieldset><legend>'+esc(g)+'</legend>'+fs.map(f=>{
+    const id='f_'+f.k.replace(/\./g,'_'),v=getP(r,f.k),is=byF[f.k],cls='f'+(f.wide||f.t==='multi'?' wide':'')+(is&&is[0]==='err'?' bad':'');
+    const lab='<label for="'+id+'">'+esc(f.l)+(f.req?' *':'')+'</label>',msg=is?'<span class="msg '+is[0]+'">'+esc(is[1])+'</span>':'',hint=f.hint?'<span class="hint">'+esc(f.hint)+'</span>':'';
+    const opts=typeof f.o==='function'?f.o():f.o;
+    let ctl;
+    if(f.t==='bool')return '<div class="'+cls+'"><label class="chk"><input type="checkbox" id="'+id+'" data-k="'+f.k+'" data-t="bool"'+(v!==false&&(v||defTrue(f.k))?' checked':'')+ro+'> '+esc(f.l)+'</label>'+hint+msg+'</div>';
+    if(f.t==='multi')return '<div class="'+cls+'"><span class="f-l" style="font-size:.8rem;font-weight:600">'+esc(f.l)+'</span><div class="multi" role="group" aria-label="'+esc(f.l)+'">'+opts.map((o,i)=>'<label class="chk"><input type="checkbox" data-k="'+f.k+'" data-t="multi" value="'+esc(o.v)+'"'+((v||[]).includes(o.v)?' checked':'')+ro+'> '+esc(o.l)+'</label>').join('')+'</div>'+hint+msg+'</div>';
+    if(f.t==='select'){const has=opts.some(o=>o.v===(v==null?'':v));ctl='<select id="'+id+'" data-k="'+f.k+'" data-t="select"'+ro+'>'+(has?'':'<option value="'+esc(v==null?'':v)+'" selected>'+(blank(v)?'Choose…':esc(v)+' (unknown)')+'</option>')+opts.map(o=>'<option value="'+esc(o.v)+'"'+(o.v===v?' selected':'')+'>'+esc(o.l)+'</option>').join('')+'</select>';}
+    else if(f.t==='tri')ctl='<select id="'+id+'" data-k="'+f.k+'" data-t="tri"'+ro+'><option value=""'+(v==null?' selected':'')+'>Not stated</option><option value="yes"'+(v===true?' selected':'')+'>Available</option><option value="no"'+(v===false?' selected':'')+'>Not available</option></select>';
+    else if(f.t==='textarea'||f.t==='list')ctl='<textarea id="'+id+'" data-k="'+f.k+'" data-t="'+f.t+'" rows="'+(f.t==='list'?4:3)+'"'+ro+'>'+esc(f.t==='list'?(v||[]).join('\n'):(v||''))+'</textarea>';
+    else ctl='<input id="'+id+'" data-k="'+f.k+'" data-t="'+f.t+'" type="'+(f.t==='number'?'number':f.t==='date'?'date':f.t==='url'?'url':f.t==='tel'?'tel':'text')+'"'+(f.t==='number'?' step="any"':'')+' value="'+esc(v==null?'':v)+'"'+ro+'>';
+    return '<div class="'+cls+'">'+lab+ctl+hint+msg+'</div>';
+  }).join('')+'</fieldset>').join('');
+}
+const defTrue=k=>['visible','active','enabled'].includes(k);
+function readForm(root,base){
+  const r=clone(base),multi={};
+  root.querySelectorAll('[data-k]').forEach(el=>{
+    const k=el.dataset.k,t=el.dataset.t;
+    if(t==='multi'){(multi[k]=multi[k]||[]);if(el.checked)multi[k].push(el.value);return;}
+    let v;
+    if(t==='bool')v=el.checked;
+    else if(t==='number')v=el.value.trim()===''?null:Number(el.value);
+    else if(t==='list')v=el.value.split('\n').map(s=>s.trim()).filter(Boolean);
+    else if(t==='tri')v=el.value==='yes'?true:el.value==='no'?false:null;
+    else v=el.value.trim();
+    setP(r,k,v);
+  });
+  Object.keys(multi).forEach(k=>setP(r,k,multi[k]));
+  return r;
+}
+
+/* ================= drawer ================= */
+let lastFocus=null;
+function openDrawer(k,uid){
+  const ds=DS[k];if(ds.single){go(k);return;}
+  const isNew=!uid,base=isNew?blankRecord(k):state.data[k].find(r=>r._uid===uid);
+  if(!base){toast('That record no longer exists.');return;}
+  lastFocus=document.activeElement;
+  state.editing={k,uid:base._uid,isNew,draft:clone(base),confirm:false};
+  drawRender();
+}
+function blankRecord(k){
+  const D={places:{visible:true,mapCategory:'attractions',see:[],nearby:[],services:[]},landmarks:{visible:true,category:'essential'},
+    transport:{active:true,verified:false,featured:false,category:'taxi',createdAt:new Date().toISOString().slice(0,10)},
+    operators:{verificationStatus:'pending'},experiences:{privateOption:false,pickupAvailable:null},
+    sponsors:{status:'draft',sponsoredLabel:'Sponsored',ctaText:'Learn more',priority:0,placements:PLACEMENTS.slice()},
+    houseAds:{placements:PLACEMENTS.slice()},partners:{active:true,order:state.data.partners.length+1,category:'Local Businesses'},
+    historyAudio:{language:'en',enabled:true,published:false,type:'history'},
+    guidance:{enabled:true,published:false,sourceType:'tts',triggerType:'manual',language:{en:{text:'',audioUrl:''},hi:{text:'',audioUrl:''}}},
+    activities:{cat:'Desert'}};
+  return Object.assign({_uid:newUid()},clone(D[k]||{}));
+}
+function drawRender(){
+  const e=state.editing,ds=DS[e.k],list=state.data[e.k].filter(r=>r._uid!==e.uid).concat([e.draft]);
+  const iss=ds.check(e.draft,list);
+  $('#drawerHost').innerHTML='<div class="scrim" data-close></div><section class="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle"><div class="dr-head"><div><h2 id="drTitle">'+(e.isNew?'New '+esc(ds.one):esc(ds.title(e.draft)||'Untitled'))+'</h2><p>'+esc(ds.label)+'</p></div><button type="button" class="dr-x" data-close aria-label="Close">×</button></div>'+
+  '<form class="dr-body" id="drForm" novalidate>'+issuesHtml(iss)+formHtml(e.k,e.draft,iss)+'</form>'+
+  '<div class="dr-foot">'+(e.confirm?'<div class="confirm">Delete this '+esc(ds.one)+' for good? <span class="grow"></span><button type="button" class="btn sm" data-cancel-del>Keep it</button><button type="button" class="btn sm danger" data-del-yes>Delete</button></div>':
+    (state.canWrite?(e.isNew?'':'<button type="button" class="btn danger sm" data-del>Delete</button><button type="button" class="btn sm" data-dup>Duplicate</button>')+'<span class="grow"></span><button type="button" class="btn" data-close>Cancel</button><button type="submit" form="drForm" class="btn primary">'+(e.isNew?'Add '+esc(ds.one):'Save')+'</button>':'<span class="grow"></span><button type="button" class="btn" data-close>Close</button>'))+'</div></section>';
+  const first=$('#drawerHost .dr-body [data-k]');if(first&&e.isNew&&!e.focused){e.focused=1;first.focus();}else if(!e.focused){e.focused=1;$('#drawerHost .dr-x').focus();}
+}
+function closeDrawer(){state.editing=null;$('#drawerHost').innerHTML='';render();if(lastFocus&&lastFocus.isConnected)lastFocus.focus();else{const t=document.querySelector('[data-uid="'+(lastUid||'')+'"]');if(t)t.focus();}}
+let lastUid=null;
+async function saveDrawer(){
+  const e=state.editing,ds=DS[e.k];
+  e.draft=readForm($('#drForm'),e.draft);
+  const list=state.data[e.k].filter(r=>r._uid!==e.uid).concat([e.draft]);
+  const errs=ds.check(e.draft,list).filter(i=>i[0]==='err');
+  if(errs.length){drawRender();toast('Fix '+errs.length+' error'+(errs.length>1?'s':'')+' before saving.');const b=$('#drawerHost .f.bad [data-k]');if(b)b.focus();return;}
+  if(e.k==='historyAudio')e.draft.updatedAt=new Date().toISOString();
+  const prev=clone(state.data[e.k]);
+  const i=state.data[e.k].findIndex(r=>r._uid===e.uid);
+  if(i>=0)state.data[e.k][i]=e.draft;else state.data[e.k].push(e.draft);
+  lastUid=e.uid;
+  try{await persist(e.k);toast((e.isNew?'Added ':'Saved ')+(ds.title(e.draft)||ds.one));closeDrawer();}
+  catch(err){state.data[e.k]=prev;}
+}
+async function deleteRecord(){
+  const e=state.editing,ds=DS[e.k],prev=clone(state.data[e.k]);
+  state.data[e.k]=state.data[e.k].filter(r=>r._uid!==e.uid);
+  try{await persist(e.k);toast('Deleted '+(ds.title(e.draft)||ds.one));lastFocus=null;closeDrawer();}catch(err){state.data[e.k]=prev;}
+}
+
+/* ================= files ================= */
+let dl=null;
+async function download(name,text){
+  try{if(!dl&&window.claude&&window.claude.use)dl=await window.claude.use('downloads');}catch(e){}
+  if(dl){try{await dl.save({filename:name,data:text});toast('Saved '+name);return;}catch(e){if(e&&e.code==='declined')return;}}
+  try{const u=URL.createObjectURL(new Blob([text],{type:/\.json$/.test(name)?'application/json':'text/javascript'}));
+    const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),1500);toast('Downloaded '+name);}
+  catch(e){copy(text,name+' copied — paste it into a new file');}
+}
+function copy(text,msg){
+  const done=()=>toast(msg||'Copied');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done,()=>fallback());else fallback();
+  function fallback(){const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy');done();}catch(e){toast('Select the text in the preview and copy it');}t.remove();}
+}
+
+/* ================= events ================= */
+function go(v){state.view=v;state.q='';state.filter='all';render();$('#main').focus({preventScroll:true});window.scrollTo(0,0);}
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-add-offer],[data-go],[data-new],[data-open],[data-filter],[data-close],[data-del],[data-del-yes],[data-cancel-del],[data-dup],[data-dl],[data-copy],#dlAll,tbody tr[data-uid]');
+  if(!t)return;
+  if(t.dataset.addOffer){addOfferFor(t.dataset.addOffer);return;}
+  if(t.dataset.go){if(t.dataset.go==='addService'){svcForm.last=null;svcForm.err={};}go(t.dataset.go);return;}
+  if(t.dataset.new){openDrawer(t.dataset.new);return;}
+  if(t.dataset.open){const k=t.dataset.open;if(DS[k].single){go(k);return;}state.view=k;render();openDrawer(k,t.dataset.uid);return;}
+  if(t.dataset.filter){state.filter=t.dataset.filter;renderMain();return;}
+  if(t.matches('tbody tr[data-uid]')){openDrawer(state.view,t.dataset.uid);return;}
+  if(t.hasAttribute('data-close')){closeDrawer();return;}
+  const ed=state.editing;
+  if(t.hasAttribute('data-del')){ed.draft=readForm($('#drForm'),ed.draft);ed.confirm=true;drawRender();$('[data-cancel-del]').focus();return;}
+  if(t.hasAttribute('data-cancel-del')){ed.confirm=false;drawRender();return;}
+  if(t.hasAttribute('data-del-yes')){deleteRecord();return;}
+  if(t.hasAttribute('data-dup')){const d=readForm($('#drForm'),ed.draft);d._uid=newUid();const key=DS[ed.k].key;if(key!=='_uid')d[key]=(d[key]||'')+'-copy';state.editing={k:ed.k,uid:d._uid,isNew:true,draft:d,confirm:false};drawRender();toast('Duplicated — change it and save');return;}
+  if(t.dataset.dl){const o=outputs().find(x=>x.id===t.dataset.dl);download(o.file,o.text());return;}
+  if(t.dataset.copy){const o=outputs().find(x=>x.id===t.dataset.copy);copy(o.text(),o.file+' copied');return;}
+  if(t.id==='dlAll'){const b={exportedAt:new Date().toISOString(),datasets:{}};ORDER.forEach(k=>b.datasets[k]=clone(state.data[k]));download('visit-jaisalmer-content.json',JSON.stringify(b,null,2));}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&state.editing){if(state.editing.confirm){state.editing.confirm=false;drawRender();}else closeDrawer();return;}
+  if(e.key==='Enter'&&e.target.matches('tbody tr[data-uid]')){e.preventDefault();openDrawer(state.view,e.target.dataset.uid);}
+  if(e.key==='Tab'&&state.editing){const f=[...document.querySelectorAll('.drawer button,.drawer input,.drawer select,.drawer textarea')].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;
+    if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();}}
+});
+document.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(e.target.id==='drForm'){if(state.canWrite)saveDrawer();return;}
+  if(e.target.id==='addServiceForm'){if(state.canWrite)submitAddService(e.target);return;}
+  if(e.target.id==='settingsForm'){
+    const r=readForm(e.target,settings()),errs=DS.settings.check(r,[r]).filter(i=>i[0]==='err');
+    const prev=clone(state.data.settings);state.data.settings=[r];
+    if(errs.length){renderMain();toast('Fix '+errs.length+' error'+(errs.length>1?'s':'')+' first.');state.data.settings=prev;return;}
+    try{await persist('settings');renderMain();toast('Settings saved');}catch(x){state.data.settings=prev;}
+  }
+});
+document.addEventListener('reset',e=>{if(e.target.id==='addServiceForm'){svcForm.type='';svcForm.err={};setTimeout(renderMain,0);}});
+document.addEventListener('change',e=>{
+  if(e.target.id==='sv_type'||e.target.id==='sv_vehicle'){
+    const f=$('#addServiceForm'),keep={name:f.querySelector('#sv_name').value,mob:f.querySelector('#sv_mobile').value,areas:f.querySelector('#sv_areas').value,desc:f.querySelector('#sv_desc').value,wa:f.querySelector('#sv_wa').checked,ok:f.querySelector('#sv_ok').checked};
+    if(e.target.id==='sv_type'){svcForm.type=e.target.value;delete svcForm.err.type;}else svcForm.vehicle=e.target.value;
+    const id=e.target.id;renderMain();restore(keep);$('#'+id).focus();
+  }
+});
+document.addEventListener('change',e=>{
+  if(e.target.id!=='importFile'||!e.target.files[0])return;
+  const fr=new FileReader();
+  fr.onload=async()=>{
+    let b;try{b=JSON.parse(fr.result);}catch(x){toast('That file isn’t valid JSON.');return;}
+    const ds=b&&b.datasets;if(!ds||typeof ds!=='object'){toast('Choose a file made with “Download everything”.');return;}
+    let n=0;
+    for(const k of ORDER){if(Array.isArray(ds[k])){state.data[k]=ds[k].filter(r=>r&&typeof r==='object').map(r=>Object.assign({},r,{_uid:r._uid||(k==='settings'?'settings':newUid())}));try{await persist(k);n++;}catch(x){}}}
+    render();toast(n?'Restored '+n+' section'+(n>1?'s':'')+' from the backup':'Nothing to restore in that file.');
+  };
+  fr.readAsText(e.target.files[0]);e.target.value='';
+});
+let qT=0;
+document.addEventListener('input',e=>{
+  if(e.target.id==='sv_mobile'){e.target.value=e.target.value.replace(/\D/g,'').slice(0,10);return;}
+  if(e.target.id==='q'){clearTimeout(qT);qT=setTimeout(()=>{state.q=e.target.value;const pos=e.target.selectionStart;renderMain();const n=$('#q');n.focus();try{n.setSelectionRange(pos,pos);}catch(x){}},160);}
+});
+render();
+connect();
+</script>
+</body>
+</html>
