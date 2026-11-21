@@ -1,1 +1,3 @@
-https://www.jaisalmervisit.com/* https://jaisalmervisit.com/:splat 301
+# Canonical www forwarding is a Cloudflare zone Single Redirect.
+# Its configuration is recorded in deploy/canonical-redirect.json.
+# Pages _redirects accepts path redirects. Domain rules belong to the zone.

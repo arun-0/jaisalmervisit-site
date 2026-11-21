@@ -157,7 +157,9 @@ visitors may keep seeing the old file.
 
 ## Deploy the static site
 
-The Pages project `jaisalmervisit` uses Direct Upload. GitHub Actions checks pushes and pull requests. The release script exports only the committed `public/` directory and labels the deployment with the exact commit. Cloudflare serves flat HTML files on extensionless paths and uses the top-level `404.html` for missing URLs. `public/_headers` and `public/_redirects` set caching, crawler rules and the canonical www redirect.
+The Pages project `jaisalmervisit` uses Direct Upload. GitHub Actions checks pushes and pull requests. The release script exports only the committed `public/` directory and labels the deployment with the exact commit. Cloudflare serves flat HTML files on extensionless paths and uses the top-level `404.html` for missing URLs. `public/_headers` sets caching and crawler rules. Path redirects go in `public/_redirects`.
+
+The Cloudflare zone Single Redirect named “Canonical www to jaisalmervisit.com” forwards HTTPS requests on `www.jaisalmervisit.com` to the same path on the apex with HTTP 301, preserving the query string. Its configuration is recorded in `deploy/canonical-redirect.json`. It is managed in the zone Rules dashboard independently of a Pages upload. Verify it after any zone migration using a deep path and campaign parameters.
 
 In a clean checkout, run `bash scripts/publish-pages.sh preview` and verify the returned HTTPS origin with `uv run --no-project --python 3.12 python scripts/check_release.py --origin https://YOUR-PREVIEW.pages.dev`. After approval, merge the site branch, update local `main`, then run `bash scripts/publish-pages.sh production`. The production command checks that local HEAD matches GitHub main. Run the release check once more against the apex. The previous production deployment is available in Pages deployment history.
 
