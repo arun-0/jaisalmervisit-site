@@ -27,7 +27,7 @@
   var C = {
     places: function(list){
       return list.filter(function(p){ return p && p.id && p.name; }).map(function(p){
-        var a = {id:p.id, name:p.name, tag:str(p.tag), short:str(p.short), youtubeUrl:str(p.youtubeUrl), image:str(p.image), why:str(p.why), see:arr(p.see),
+        var a = {id:p.id, name:p.name, tag:str(p.tag), short:str(p.short), youtubeUrl:str(p.youtubeUrl), image:str(p.image), imageAlt:str(p.imageAlt), why:str(p.why), see:arr(p.see),
                  bestTime:str(p.bestTime), location:str(p.location), distance:str(p.distance), nearby:arr(p.nearby), tips:str(p.tips)};
         if(p.ticketText || p.ticketUrl) a.ticket = clean({text:p.ticketText, url:p.ticketUrl});
         if(p.timing) a.timing = p.timing;

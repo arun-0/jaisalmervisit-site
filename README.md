@@ -1,6 +1,6 @@
 # Visit Jaisalmer
 
-Tourism website + admin panel, hosted on Firebase (Spark / free plan).
+Mobile travel guide and local directory for jaisalmervisit.com. Cloudflare Pages serves the contents of `public/`. Firestore, Storage and authentication use Firebase project `visitjaisalmer-e3085`. The original Firebase Hosting site is available separately for rollback.
 
 | Path | What |
 |---|---|
@@ -12,31 +12,39 @@ Tourism website + admin panel, hosted on Firebase (Spark / free plan).
 | `scripts/` | Maintenance scripts (see below) |
 | `originals/` | The approved single-file designs the project was built from — reference only, not deployed |
 
-## Requirements
+## Build and preview the guide
 
-- Node 18+ and the Firebase CLI: `npm i -g firebase-tools`
-- Java 11+ (for the Firestore / Storage emulators)
-- Python 3 (for `scripts/rehash.py`)
-- Google Cloud CLI (`gcloud auth login`) — only to run `scripts/seed.mjs` against production
-
-## Run locally
+Open Git Bash in the site checkout. The static build uses the Python standard library (3.11+) through uv. The Node tools below use the existing fnm installation.
 
 ```bash
-firebase emulators:start
+uv run --no-project --python 3.12 python scripts/build_guides.py
+uv run --no-project --python 3.12 python scripts/check_release.py
+eval "$(fnm env --shell bash)"
+fnm use 24
+npm exec --yes --package=wrangler@4.166.0 -- wrangler pages dev public
 ```
 
-- Website: http://127.0.0.1:5002/
-- Admin: http://127.0.0.1:5002/admin (sign in with the emulator's fake Google account picker;
-  first run `node scripts/seed.mjs --emulator --admin you@gmail.com`)
-- Emulator UI (Firestore, Auth, Storage data): http://127.0.0.1:4000/
+Open the local URL Wrangler prints. New guide pages include the full article in the HTML. The interactive homepage attempts to use the Firebase emulators on localhost and falls back to its built-in content when they are offline.
 
-Port 5002 is used instead of 5000 because macOS reserves 5000 for AirPlay.
+## Edit a page
 
-To keep emulator data between runs:
+Each Markdown file in `content/places`, `content/itineraries` or `content/things-to-do` has a stable filename that becomes its URL. Copy an existing file in the same folder. Fill in the title, description and body. The editor supports second- and third-level headings, paragraphs, bullet lists and HTTPS or site-relative Markdown links. Leave a blank line between blocks. The `+++` lines enclose TOML metadata.
+
+Optional fields include a published app ID for the interactive map, itinerary or activity, a photo with alt text, coordinates, related guide paths and question/answer pairs. Rebuild after an edit and commit the Markdown and generated HTML together. Build output includes the homepage links and the sitemap. A removed Markdown guide is pruned on rebuild. Add an explicit redirect for a renamed public URL.
+
+The initial 35 articles derive from the public visitor feed on 21 November 2026. Editors own the Markdown copy. The admin panel still publishes live map, directory and planner data. Changes to a place, activity or itinerary in the admin should also be reviewed in its corresponding article. A normal build runs offline.
+
+Display ad placements on guides use two confirmed AdSense unit IDs for articles of 600 or more body words, or up to three above 1,000 words. These are editorial thresholds. The owner can supply IDs in `content/advertising.toml` after checking publisher status and regional consent settings. The empty default makes zero guide ad requests. The homepage retains its existing advertising integration.
+
+## Firebase emulator development
+
+The admin panel, forms and security-rule tests use Firebase's local emulators. With a compatible JDK on PATH and Node selected through fnm, run:
 
 ```bash
-firebase emulators:start --import=./emulator-data --export-on-exit
+npm exec --yes --package=firebase-tools -- firebase emulators:start
 ```
+
+Local hosting uses port 5002, the admin page is at `http://127.0.0.1:5002/admin`, and the emulator UI uses port 4000. To initialise a test admin use `fnm exec --using=24 node scripts/seed.mjs --emulator --admin you@example.com`. Add `--import=./emulator-data --export-on-exit` to the emulator command to keep local data between runs.
 
 ## Data model (Firestore)
 
@@ -80,10 +88,7 @@ published data converted to the shape it already uses, or its built-in data when
   nothing loads until the visitor clicks *Accept* in the cookie notice; *Cookie settings* in the
   footer reopens it. The site's `jm:analytics` events are forwarded as GA4 events of the same name.
   Off on localhost unless the URL has `?ga-debug`.
-- **AdSense** (publisher `ca-pub-9028150722368329`): the AdSense code is in `index.html`'s `<head>`, right
-  after the Consent Mode defaults, so Google serves non-personalised ads (the cookie notice grants analytics only).
-  `public/ads.txt` authorises the publisher. Ads appear only once AdSense approves the site; the in-page ad slots
-  (`SmartAdManager`) still use Ad Manager/GPT until they're switched (see HANDOFF open item 16).
+- **AdSense** uses the publisher declared in `public/ads.txt`. The homepage loads the publisher script after consent defaults. Its interactive ad component has a separate Ad Manager configuration. Dashboard approval, regional consent and actual fill require verification in the owner's account.
 - **Privacy policy** at `/privacy` (`public/privacy.html`, linked from the footer and the cookie notice): AdSense
   requires it. Keep it in step with what the site collects, and with any change to ad / analytics consent.
 - **Map provider** is chosen in the admin: *Settings → Map* (tiles, routing, keys). Default is public
@@ -102,7 +107,7 @@ published data converted to the shape it already uses, or its built-in data when
   anywhere. If the browser already allows location, the map refreshes it silently and follows the
   visitor while open; if it's blocked, the site explains instead of asking again.
 - **Domain**: canonical / Open Graph / robots / sitemap use `https://jaisalmervisit.com`.
-  After connecting the custom domain: `python3 scripts/set-domain.py https://your-domain` and deploy.
+  The generated guides inherit the homepage canonical origin.
 - `404.html`, `privacy.html`, `ads.txt`, `robots.txt`, `sitemap.xml`, favicons and `og-image.jpg` live in `public/`.
 
 ## Admins
@@ -110,9 +115,9 @@ published data converted to the shape it already uses, or its built-in data when
 Admins sign in with Google. Add or remove one (emulator or production):
 
 ```bash
-node scripts/seed.mjs --emulator --admin someone@gmail.com
-node scripts/seed.mjs --project visitjaisalmer-e3085 --admin someone@gmail.com      # uses your gcloud login
-node scripts/seed.mjs --project visitjaisalmer-e3085 --remove-admin someone@gmail.com
+fnm exec --using=24 node scripts/seed.mjs --emulator --admin someone@gmail.com
+fnm exec --using=24 node scripts/seed.mjs --project visitjaisalmer-e3085 --admin someone@gmail.com      # uses your gcloud login
+fnm exec --using=24 node scripts/seed.mjs --project visitjaisalmer-e3085 --remove-admin someone@gmail.com
 ```
 
 Or in the Firebase console: Firestore → `admins` → add a document whose ID is the email.
@@ -120,8 +125,8 @@ Or in the Firebase console: Firestore → `admins` → add a document whose ID i
 ## Seeding content
 
 ```bash
-node scripts/seed.mjs --emulator --defaults               # local
-node scripts/seed.mjs --project visitjaisalmer-e3085 --defaults   # production, once
+fnm exec --using=24 node scripts/seed.mjs --emulator --defaults               # local
+fnm exec --using=24 node scripts/seed.mjs --project visitjaisalmer-e3085 --defaults   # production, once
 ```
 
 Copies the admin panel's built-in `DEFAULTS` into every empty section and publishes them.
@@ -132,7 +137,7 @@ The admin's **Overview → Copy into database** button does the same while signe
 With the emulators running:
 
 ```bash
-node scripts/test-rules.mjs
+fnm exec --using=24 node scripts/test-rules.mjs
 ```
 
 Checks reads/writes for anonymous visitors, signed-in non-admins and admins across
@@ -144,26 +149,21 @@ Files in `public/assets/{css,js,img,data}` are named `name.<hash>.ext` so browse
 for a year. **After editing one, run:**
 
 ```bash
-python3 scripts/rehash.py
+uv run --no-project --python 3.12 python scripts/rehash.py
 ```
 
-It renames changed files and updates every reference to them. Forgetting this step means
+It renames changed files and updates asset references. Rebuild the guides after rehashing. Forgetting this step means
 visitors may keep seeing the old file.
 
-## Deploy
+## Deploy the static site
 
-```bash
-firebase login
-firebase use visitjaisalmer-e3085   # already set in .firebaserc
-firebase deploy                  # hosting + Firestore rules/indexes + Storage rules
-firebase deploy --only hosting   # site files only
-```
+The Pages project `jaisalmervisit` uses Direct Upload. GitHub Actions checks pushes and pull requests. The release script exports only the committed `public/` directory and labels the deployment with the exact commit. Cloudflare serves flat HTML files on extensionless paths and uses the top-level `404.html` for missing URLs. `public/_headers` and `public/_redirects` set caching, crawler rules and the canonical www redirect.
 
-Preview channel (temporary URL, does not touch the live site):
+In a clean checkout, run `bash scripts/publish-pages.sh preview` and verify the returned HTTPS origin with `uv run --no-project --python 3.12 python scripts/check_release.py --origin https://YOUR-PREVIEW.pages.dev`. After approval, merge the site branch, update local `main`, then run `bash scripts/publish-pages.sh production`. The production command checks that local HEAD matches GitHub main. Run the release check once more against the apex. The previous production deployment is available in Pages deployment history.
 
-```bash
-firebase hosting:channel:deploy preview --expires 7d
-```
+On this Windows PC the project-scoped Wrangler sign-in is under `%LOCALAPPDATA%/JaisalmerVisit/Cloudflare`. The script selects it when present. Another machine can use its own authorised Wrangler session. Automatic publication from GitHub would require a dedicated Pages deployment identity and owner approval.
+
+Firebase Hosting at `https://visitjaisalmer-e3085.web.app` is the original static fallback. The release does not call Firebase deploy. Firestore and Storage rules are administered separately. See the private business repository for the custom-domain record history and rollback procedure.
 
 ## Map road routes (built-in directions)
 
@@ -175,9 +175,9 @@ outside the district box) gets the straight line plus Google / Apple Maps. To pi
 mapped in OpenStreetMap (every few months, or after fixing a road on openstreetmap.org):
 
 ```bash
-node scripts/build-roads.mjs
-python3 scripts/rehash.py
-firebase deploy --only hosting
+fnm exec --using=24 node scripts/build-roads.mjs
+uv run --no-project --python 3.12 python scripts/rehash.py
+uv run --no-project --python 3.12 python scripts/build_guides.py
 ```
 
 The road file is OpenStreetMap data (© OpenStreetMap contributors, ODbL); the map credits it.

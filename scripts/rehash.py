@@ -38,7 +38,7 @@ def one_pass():
         for old, new in renames.items():
             new_text = new_text.replace(old, new)
         if new_text != text:
-            f.write_text(new_text, encoding='utf-8')
+            f.write_text(new_text, encoding='utf-8', newline='\n')
             print(f'  updated refs in {f.relative_to(PUBLIC)}')
     return renames
 

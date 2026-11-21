@@ -47,13 +47,4 @@
     social.hidden = !shown;
   }
 
-  /* ---- Partners marquee: a visible pause control (moving content must be stoppable) ---- */
-  const ps = document.getElementById('partners'), pb = document.getElementById('partnersPause');
-  if(ps && pb){
-    pb.addEventListener('click', ()=>{
-      const paused = ps.classList.toggle('is-paused');
-      pb.setAttribute('aria-pressed', String(paused));
-      pb.textContent = paused ? 'Play' : 'Pause';
-    });
-  }
 })();

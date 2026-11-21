@@ -1,0 +1,49 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+/
+  Cache-Control: no-cache
+/admin
+  Cache-Control: no-cache
+  X-Robots-Tag: noindex, nofollow
+/admin/*
+  Cache-Control: no-cache
+  X-Robots-Tag: noindex, nofollow
+/places/*
+  Cache-Control: no-cache
+/itineraries/*
+  Cache-Control: no-cache
+/things-to-do/*
+  Cache-Control: no-cache
+/privacy
+  Cache-Control: no-cache
+/workneed
+  Cache-Control: no-cache
+/assets/css/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/js/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/img/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/data/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/audio/*
+  Cache-Control: public, max-age=86400
+/favicon.ico
+  Cache-Control: public, max-age=604800
+/favicon.svg
+  Cache-Control: public, max-age=604800
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+/og-image.jpg
+  Cache-Control: public, max-age=604800
+/workneed-logo.webp
+  Cache-Control: public, max-age=604800
+/robots.txt
+  Cache-Control: public, max-age=3600
+/ads.txt
+  Cache-Control: public, max-age=3600
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
