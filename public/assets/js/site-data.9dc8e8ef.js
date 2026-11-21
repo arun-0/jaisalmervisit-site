@@ -12,7 +12,8 @@
    ============================================================ */
 (function(root){
   'use strict';
-  var BOOT_TIMEOUT_MS = 1500;
+  // A first uncached Firestore read can take several seconds on a mobile connection.
+  var BOOT_TIMEOUT_MS = 8000;
   var CACHE_KEY = 'vj_published_v1';
 
   /* ---------- converters: admin record → the shapes the page scripts use ---------- */
@@ -153,7 +154,9 @@
 
   function fetchPublished(){
     if(!CFG.projectId || typeof fetch !== 'function') return Promise.reject(new Error('no config'));
-    return fetch(url('/published', 'pageSize=50'), {credentials:'omit', headers:{'Accept':'application/json'}})
+    var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = ctrl && setTimeout(function(){ ctrl.abort(); }, BOOT_TIMEOUT_MS);
+    return fetch(url('/published', 'pageSize=50'), {credentials:'omit', signal:ctrl && ctrl.signal, headers:{'Accept':'application/json'}})
       .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(j){
         var out = {};
@@ -162,7 +165,8 @@
           if(Array.isArray(v.items)) out[id] = v.items;
         });
         return out;
-      });
+      })
+      .finally(function(){ if(timer) clearTimeout(timer); });
   }
 
   function readCache(){ try{ var c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null'); return c && c.data && typeof c.data === 'object' ? c.data : null; }catch(e){ return null; } }
