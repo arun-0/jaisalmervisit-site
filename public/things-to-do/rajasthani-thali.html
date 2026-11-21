@@ -28,7 +28,7 @@ gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personali
 </script>
 
 <script defer src="/assets/js/firebase-config.46614717.js"></script>
-<script defer src="/assets/js/analytics.5bf9076c.js"></script>
+<script defer src="/assets/js/analytics.bd0ddf39.js"></script>
 </head>
 <body class="guide-page">
 <a class="skip-link" href="#guide">Skip to guide</a>
@@ -43,7 +43,7 @@ gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personali
     <a class="guide-category" href="/#things-to-do">Activity guides</a>
     <h1>Rajasthani Thali in Jaisalmer</h1>
     <p class="guide-intro">Sit down to a Rajasthani thali — regional dishes, breads and sweets served together in one meal.</p>
-    <a class="guide-action" href="/#things-to-do?activity=rajasthani-thali">Explore this activity <span aria-hidden="true">↗</span></a>
+    <a class="guide-action" data-guide-action="primary" href="/#things-to-do?activity=rajasthani-thali">Explore this activity <span aria-hidden="true">↗</span></a>
 
     <div class="guide-copy">
       <section><h2>What to expect</h2>
@@ -59,5 +59,18 @@ gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personali
   </article>
 </main>
 <footer class="guide-footer"><div class="guide-bar"><a href="/">Jaisalmer Visit</a><a href="/privacy">Privacy policy</a><button type="button" data-cookie-settings>Cookie settings</button></div></footer>
+<script>
+document.addEventListener('click', function(event){
+  var link = event.target.closest('.guide-article a');
+  if(!link) return;
+  var destination = new URL(link.href, location.href);
+  if(destination.origin !== location.origin) return;
+  document.dispatchEvent(new CustomEvent('jm:analytics', {detail:{
+    event:'guide_action_click', guide_path:location.pathname,
+    destination_path:destination.pathname + destination.hash,
+    action:link.dataset.guideAction || (destination.hash ? 'directory' : 'related_guide')
+  }}));
+});
+</script>
 </body>
 </html>

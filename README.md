@@ -34,7 +34,9 @@ Optional fields include a published app ID for the interactive map, itinerary or
 
 The initial 35 articles derive from the public visitor feed on 21 November 2026. Editors own the Markdown copy. The admin panel still publishes live map, directory and planner data. Changes to a place, activity or itinerary in the admin should also be reviewed in its corresponding article. A normal build runs offline.
 
-Display ad placements on guides use two confirmed AdSense unit IDs for articles of 600 or more body words, or up to three above 1,000 words. These are editorial thresholds. The owner can supply IDs in `content/advertising.toml` after checking publisher status and regional consent settings. The empty default makes zero guide ad requests. The homepage retains its existing advertising integration.
+Display ad placements on guides use two confirmed AdSense unit IDs for articles of 600 or more body words, or up to three above 1,000 words. These are editorial thresholds. The owner can supply IDs in `content/advertising.toml` after checking publisher status and regional consent settings. The empty default makes zero manual guide ad requests. `auto_ads` separately controls the publisher loader for guides, independent of word count and manual slots; it defaults to `false`. Enable only after approval of the concrete rollout and the account/consent setup. The 21 November audit found Auto ads already ON in AdSense, zero recorded delivery, identity verification not started and no published Google European regulations message. An enabled loader is an integration check, not proof of filled ads or earnings.
+
+Guide article links emit `guide_action_click` with the guide path, internal destination and action type through the existing consent-controlled analytics channel. This records an expression of interest, not a qualified lead or booking. The homepage retains its existing advertising integration. Internal event `source` values are forwarded as `interaction_source` to keep UI origins separate from acquisition attribution. Event forwarding stops after analytics consent is withdrawn and resumes when it is granted again.
 
 ## Firebase emulator development
 

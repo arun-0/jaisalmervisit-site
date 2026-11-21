@@ -1,3 +1,8 @@
+# Auto ads uses the publisher loader independently of manual slots and article length.
+# Keep off until owner approval, identity activation and regional consent review.
+# AdSense Auto ads is already ON in the account; enabling this expands guide coverage.
+auto_ads = false
+
 # Optional display ad unit IDs from the site's own AdSense account, in reading order.
 # Set two or three confirmed IDs after the owner approves the placements and consent setup.
 # Blank configuration produces ordinary article text without ad requests or reserved gaps.
