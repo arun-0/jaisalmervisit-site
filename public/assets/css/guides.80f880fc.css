@@ -9,7 +9,7 @@
 .guide-category{display:inline-block;font-size:.85rem;font-weight:700;color:#735226;text-decoration:underline;text-underline-offset:.2em}
 .guide-article h1{margin:.6rem 0 1rem;font-family:var(--font-display),Georgia,serif;font-size:clamp(2.5rem,7vw,4.8rem);line-height:1.05;letter-spacing:-.035em}
 .guide-intro{font-size:clamp(1.12rem,2.8vw,1.42rem);line-height:1.55;max-width:54ch}
-.guide-action{display:inline-flex;gap:.6em;align-items:center;margin:1.2rem 0 .5rem;padding:.65rem 1.1rem;background:#23423e;color:white;border-radius:.4rem;font-weight:650}
+.guide-action,.guide-action:visited{display:inline-flex;gap:.6em;align-items:center;margin:1.2rem 0 .5rem;padding:.65rem 1.1rem;background:#23423e;color:white;border-radius:.4rem;font-weight:650}
 .guide-photo{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:.7rem;margin:1.3rem 0 2rem;background:#eadfc8}
 .guide-copy{max-width:66ch;font-size:1.04rem;line-height:1.7}
 .guide-copy section{margin:2rem 0}
