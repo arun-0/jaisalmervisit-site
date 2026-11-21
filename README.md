@@ -157,9 +157,11 @@ visitors may keep seeing the old file.
 
 ## Deploy the static site
 
-The Pages project uses the private GitHub site repository, branch `main`, no framework preset, an empty build command and `public` as the output directory. The generated files are checked in. Cloudflare serves flat HTML files on extensionless paths and uses the top-level `404.html` for missing URLs. `public/_headers` and `public/_redirects` set caching, crawler rules and the canonical www redirect.
+The Pages project `jaisalmervisit` uses Direct Upload. GitHub Actions checks pushes and pull requests. The release script exports only the committed `public/` directory and labels the deployment with the exact commit. Cloudflare serves flat HTML files on extensionless paths and uses the top-level `404.html` for missing URLs. `public/_headers` and `public/_redirects` set caching, crawler rules and the canonical www redirect.
 
-Review the preview URL with `uv run --no-project --python 3.12 python scripts/check_release.py --origin https://YOUR-PREVIEW.pages.dev`. Merge the reviewed branch to publish and run the same check against the apex. The previous production deployment is available in Pages deployment history.
+In a clean checkout, run `bash scripts/publish-pages.sh preview` and verify the returned HTTPS origin with `uv run --no-project --python 3.12 python scripts/check_release.py --origin https://YOUR-PREVIEW.pages.dev`. After approval, merge the site branch, update local `main`, then run `bash scripts/publish-pages.sh production`. The production command checks that local HEAD matches GitHub main. Run the release check once more against the apex. The previous production deployment is available in Pages deployment history.
+
+On this Windows PC the project-scoped Wrangler sign-in is under `%LOCALAPPDATA%/JaisalmerVisit/Cloudflare`. The script selects it when present. Another machine can use its own authorised Wrangler session. Automatic publication from GitHub would require a dedicated Pages deployment identity and owner approval.
 
 Firebase Hosting at `https://visitjaisalmer-e3085.web.app` is the original static fallback. The release does not call Firebase deploy. Firestore and Storage rules are administered separately. See the private business repository for the custom-domain record history and rollback procedure.
 
