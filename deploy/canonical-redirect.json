@@ -1,0 +1,15 @@
+{
+  "description": "Canonical www to jaisalmervisit.com",
+  "action": "redirect",
+  "expression": "(http.request.full_uri wildcard \"https://www.jaisalmervisit.com/*\")",
+  "action_parameters": {
+    "from_value": {
+      "status_code": 301,
+      "target_url": {
+        "expression": "wildcard_replace(http.request.full_uri, \"https://www.jaisalmervisit.com/*\", \"https://jaisalmervisit.com/${1}\")"
+      },
+      "preserve_query_string": true
+    }
+  },
+  "enabled": true
+}
