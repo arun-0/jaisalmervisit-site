@@ -293,7 +293,7 @@ places:{label:'Places',group:'Content',one:'place',key:'id',
     ['Visitor information',[{k:'bestTime',l:'Best time',t:'text',wide:1},{k:'location',l:'Location',t:'text'},{k:'distance',l:'Distance',t:'text'},{k:'address',l:'Address',t:'text'},{k:'timing',l:'Opening hours',t:'text'},{k:'ticketText',l:'Entry / ticket note',t:'text'},{k:'ticketUrl',l:'Ticket link',t:'url',hint:'https:// only'}]],
     ['Map',[{k:'lat',l:'Latitude',t:'number',hint:'Verified coordinates only'},{k:'lng',l:'Longitude',t:'number'},{k:'mapCategory',l:'Map category',t:'select',o:MAP_CATS.map(c=>opt(c))},{k:'mapSub',l:'Map sub-category',t:'text',hint:'e.g. Fort & Havelis, Lakes, Temples'}]],
     ['Official contact',[{k:'phone',l:'Phone',t:'tel'},{k:'whatsapp',l:'WhatsApp',t:'tel'},{k:'website',l:'Website',t:'url'},{k:'email',l:'Email',t:'text'}]],
-    ['Media & services',[{k:'image',l:'Photo',t:'text',wide:1,hint:'Shown on the Explore card and at the top of the place page instead of the drawing. Press Upload and pick a landscape photo (it is resized for the web automatically), or paste an https:// link. Leave empty for the drawing.'},{k:'youtubeUrl',l:'YouTube video',t:'url',wide:1,hint:'A youtube.com or youtu.be link. Shows a “Watch video” button next to Location, and a play mark on the photo. Leave empty for no video.'},{k:'services',l:'Services at this place',t:'multi',wide:1,o:()=>REF.services.map(s=>opt(s.id,s.label)),hint:'Leave all unticked to use the area’s default list.'}]]
+    ['Media & services',[{k:'image',l:'Photo',t:'text',wide:1,hint:'Shown on the Explore card and at the top of the place page instead of the drawing. Press Upload and pick a landscape photo (it is resized for the web automatically), or paste an https:// link. Leave empty for the drawing.'},{k:'imageAlt',l:'Photo description',t:'text',wide:1,hint:'Describe what is visible in the photo for people using a screen reader.'},{k:'youtubeUrl',l:'YouTube video',t:'url',wide:1,hint:'A youtube.com or youtu.be link. Shows a “Watch video” button next to Location, and a play mark on the photo. Leave empty for no video.'},{k:'services',l:'Services at this place',t:'multi',wide:1,o:()=>REF.services.map(s=>opt(s.id,s.label)),hint:'Leave all unticked to use the area’s default list.'}]]
   ],
   check(r,all){const o=[];idCheck(o,r,'id',all,'Place ID');need(o,r,'name','Name');need(o,r,'short','Summary');
     const hasLat=!blank(r.lat),hasLng=!blank(r.lng);
@@ -438,7 +438,7 @@ partners:{label:'Best Choice strip',group:'Promotion',one:'partner',key:'_uid',
   check(r){const o=[];need(o,r,'name','Name');
     if(r.url&&!linkOk(r.url))o.push(['err','Use an https:// link or a page on this site like /workneed','url']);
     if(r.logo&&!httpsOk(r.logo))o.push(['err','Must start with https://','logo']);
-    if(r.placeholder&&r.active!==false&&settings().showPlaceholders)o.push(['warn','Demo partner is shown publicly — replace it or turn demo entries off in Settings','placeholder']);
+    if(r.placeholder&&r.active!==false&&settings().showPlaceholders)o.push(['warn','Demo partner is visible in the local preview','placeholder']);
     return o;}},
 historyAudio:{label:'History audio',group:'Audio',one:'audio story',key:'_uid',
   hint:'Narrated story for each place, one per language. A place shows History Audio in each language that has a published recording (English read by the device voice only if Settings → Audio switches it on). To add the other language for a place, press “+ Add audio story” — don’t change the language of its existing story.',
@@ -476,7 +476,7 @@ guidance:{label:'Audio guide',group:'Audio',one:'guide clip',key:'id',
     return o;}},
 settings:{label:'Settings',group:'Site',one:'settings',key:'_uid',single:true,
   hint:'Feature switches, map providers, ads and social links.',
-  groups:[['Features',[{k:'showPlaceholders',l:'Show demo partners in the strip',t:'bool',wide:1,hint:'Leave off on the live site — demo entries are not real businesses.'}]],
+  groups:[['Features',[{k:'showPlaceholders',l:'Preview demo partners locally',t:'bool',wide:1,hint:'Applies only to the local emulator. The public partner list hides demo entries.'}]],
     ['Map',[{k:'tiles',l:'Map tiles',t:'select',o:[opt('osm','OpenStreetMap public (testing only)'),opt('stadia','Stadia Maps'),opt('maptiler','MapTiler'),opt('mapbox','Mapbox'),opt('selfhosted','Self-hosted')]},{k:'routing',l:'Directions',t:'select',o:[opt('builtin','Built-in — Jaisalmer roads (free, no account)'),opt('fossgis','FOSSGIS OSRM (non-commercial)'),opt('stadia','Stadia Maps'),opt('osrm','Self-hosted OSRM'),opt('mapbox','Mapbox'),opt('off','Off — Google/Apple links only')]},{k:'maptilerKey',l:'MapTiler key',t:'text'},{k:'mapboxToken',l:'Mapbox public token',t:'text',hint:'Publishable keys only. Restrict them to your domain.'},{k:'stadiaKey',l:'Stadia API key (optional)',t:'text',hint:'Not needed on the live site if your domain is registered in the Stadia dashboard.'}]],
     ['Advertising',[{k:'adsEnabled',l:'Smart ads on',t:'bool',hint:'Master switch for every ad: sponsors and house promos (popups, and the small card under a playing story), plus Google popups if that switch is on. Popups never cover a playing story, a form or the map.'},{k:'googleEnabled',l:'Google ads (needs consent)',t:'bool'},{k:'maxAdsPerSession',l:'Max per visit',t:'number'},{k:'maxAdsPerDay',l:'Max per day',t:'number'},{k:'globalCooldownMinutes',l:'Minutes between ads',t:'number'},{k:'googleAdUnitPath',l:'Google ad unit path',t:'text',hint:'/1234567/your-unit'}]],
     ['Where ads may appear',[{k:'adPlaceExploration',l:'After a visitor explores a few places',t:'bool',hint:'Shown when they close a place, after 3 places.'},{k:'adDuringHistoryAudio',l:'During a history audio story',t:'bool',hint:'A small card under the player as soon as the story starts; it disappears when the story ends. Silent — text and a small image from your Sponsors (placement “audio-guide”), else your House promos. Never Google ads, so never video.'},{k:'adHistoryAudio',l:'After a history audio story',t:'bool',hint:'A popup after the visitor closes the place, once they’ve listened for 20 s or more. Skipped when the story already showed a card.'},{k:'adMapLocation',l:'After using the Smart Tourist Map',t:'bool',hint:'Shown when they close the map.'},{k:'adItinerary',l:'While planning a trip',t:'bool',hint:'After two itinerary days are opened.'}]],
@@ -487,7 +487,7 @@ settings:{label:'Settings',group:'Site',one:'settings',key:'_uid',single:true,
     if(r.tiles==='stadia'&&!r.stadiaKey)o.push(['info','Stadia works on the live site only after visitjaisalmer-e3085.web.app (and your own domain) is added in the Stadia dashboard. Its free plan doesn’t allow commercial use.','tiles']);
     if(r.routing==='off')o.push(['info','Directions are off: the map draws a straight blue line to the destination and hands turn-by-turn to Google / Apple Maps. Pick “Built-in” (or another routing provider) for road routes.','routing']);
     ['socialYoutube','socialFacebook','socialInstagram','socialX'].forEach(k=>{if(r[k]&&!httpsOk(r[k]))o.push(['err','Must start with https://',k]);});
-    if(r.showPlaceholders)o.push(['warn','Demo partners are shown publicly','showPlaceholders']);
+    if(r.showPlaceholders)o.push(['warn','Demo partners are enabled in the local preview','showPlaceholders']);
     if(r.tiles==='osm')o.push(['warn','Public OpenStreetMap tiles are for light use only — pick a provider before launch','tiles']);
     if(r.routing==='fossgis')o.push(['err','FOSSGIS routing is for non-commercial use only — not allowed on this site','routing']);
     if(r.routing==='mapbox'&&r.tiles!=='mapbox')o.push(['err','Mapbox directions may only be used with Mapbox tiles','routing']);
@@ -516,7 +516,7 @@ function annPreviewDoc(a,width){
   const th=ANN_THEMES.some(t=>t.v&&t.v===a.theme)?' data-theme="'+esc(a.theme)+'"':'';
   return '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><base href="'+esc(location.origin)+'/"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"><link rel="stylesheet" href="'+ANN_CSS+'"><style>body{margin:0;background:#F5EBD7}</style></head><body><aside class="announcement-bar"'+th+'><div class="announcement-bar-inner">'+annItemHtml(a)+'</div></aside></body></html>';
 }
-const ANN_CSS='/assets/css/site.0abbc9e0.css';
+const ANN_CSS='/assets/css/site.399abaa3.css';
 function placeName(id){const p=state.data.places.find(x=>x.id===id);return p?p.name:(id||'—');}
 function modeLabel(id){const m=REF.modes.find(x=>x.id===id);return m?m.label:'—';}
 const settings=()=>state.data.settings[0]||{};

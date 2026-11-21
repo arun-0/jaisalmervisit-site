@@ -276,7 +276,7 @@ const TRANSPORT_FEED = {url:null};   // future: '/api/transport-providers' → {
    - verified:  reserved for future "verified partner" badge
    - featured:  reserved for future highlighting/sorting
    ============================================================ */
-/* placeholder:true = demo record, never shown publicly unless PARTNERS_CONFIG.showPlaceholders is true.
+/* placeholder:true = demo record, available for preview in the local emulator.
    Remove the flag (or the record) once a real partner is confirmed. */
 const PARTNERS_CONFIG = VJData.partnersConfig({ showPlaceholders:false });
 const FEATURED_BRANDS = VJData.get('FEATURED_BRANDS', [
@@ -409,7 +409,7 @@ function placePhotoUrl(raw){
 // cls = classes of the image wrapper; with no cls and no video the artwork is returned bare.
 function placeMediaHtml(a, art, cls){
   const photo = placePhotoUrl(a.image);
-  if(photo) art = `<img class="place-photo" src="${escHtml(photo)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`;
+  if(photo) art = `<img class="place-photo" src="${escHtml(photo)}" alt="${escHtml(a.imageAlt || a.name)}" loading="lazy" decoding="async" onerror="this.remove()">`;
   const url = youtubeWatchUrl(a.youtubeUrl);
   if(!url) return cls ? `<div class="${cls}">${art}</div>` : art;
   return `<a class="${cls ? cls + ' ' : ''}youtube-card" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Watch ${escHtml(a.name)} video on YouTube (opens in a new tab)">${art}<span class="youtube-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" focusable="false"><path d="M8.5 5.8v12.4a.8.8 0 0 0 1.2.7l9.7-6.2a.8.8 0 0 0 0-1.4L9.7 5.1a.8.8 0 0 0-1.2.7z" fill="currentColor"/></svg></span></a>`;
@@ -524,81 +524,50 @@ function partnerLink(raw){
 }
 /* Name colours the admin can pick for Best Choice (light tints that stay readable on the dark strip). */
 const PARTNER_COLORS = ['gold','orange','green','blue','purple','pink','red','white'];
-function renderPartnersMarquee(){
-  const rowEls = [document.getElementById('partnersTrackRow1'), document.getElementById('partnersTrackRow2')];
-  if(!rowEls[0] || !rowEls[1]) return;
+function renderPartners(){
+  const list = document.getElementById('partnerList');
+  if(!list) return;
+  const demoNames = new Set(['service provider ltd', 'workneed app']);
+  const demoPreview = window.VJ_FIREBASE?.USE_EMULATORS && PARTNERS_CONFIG.showPlaceholders;
+  const items = FEATURED_BRANDS.filter(b => {
+    const name = String(b.name || '').trim().toLowerCase();
+    return b.active && name && (demoPreview || (!b.placeholder && !demoNames.has(name)));
+  }).sort((a, b) => a.order - b.order);
 
-  const items = FEATURED_BRANDS
-    .filter(b => b.active && (!b.placeholder || PARTNERS_CONFIG.showPlaceholders))
-    .sort((a,b) => a.order - b.order);
-
-  const section = rowEls[0].closest('.partners-section');
-  if(!items.length){ if(section) section.hidden = true; return; }
-
-  // Split alternately so each row gets a mixed set of categories rather
-  // than a lopsided block, and hide row 2 entirely if there's too little
-  // data to fill two rows meaningfully (falls back to a single polished row).
-  const rows = [[], []];
-  items.forEach((b,i) => rows[i % 2].push(b));
-  if(rows[1].length < 3){
-    rows[0] = items;
-    rows[1] = [];
-    const row2Wrap = document.getElementById('partnersMarqueeRow2');
-    if(row2Wrap) row2Wrap.style.display = 'none';
-  }
-
-  function buildGroup(rowItems, isClone){
-    const group = document.createElement('div');
-    group.className = 'marquee-group';
-    if(isClone){
-      group.setAttribute('data-clone','true');
-      group.setAttribute('aria-hidden','true');
+  list.closest('section').hidden = items.length === 0;
+  items.forEach(b => {
+    const row = document.createElement('li');
+    const link = partnerLink(b.url), logo = safeHttpUrl(b.logo);
+    const item = document.createElement(link ? 'a' : 'span');
+    item.className = 'marquee-item';
+    if(link){
+      item.href = link.href;
+      if(link.external){ item.target = '_blank'; item.rel = 'noopener noreferrer'; }
     }
-    rowItems.forEach(b => {
-      const shortCat = PARTNER_CATEGORY_SHORT[b.category] || b.category;
-      const logo = safeHttpUrl(b.logo), link = partnerLink(b.url);
-      const itemInner = logo
-        ? `<img class="marquee-logo-img" src="${escHtml(logo)}" alt="${isClone ? '' : escHtml(b.name + ' — ' + b.category)}" loading="lazy" decoding="async" width="140" height="30">`
-        : `<span class="marquee-cat" aria-hidden="true">${escHtml(shortCat)}</span><span class="marquee-logo-text">${escHtml(b.name)}</span>`;
-
-      // The copy that scrolls into view is a link too (out of the tab order), so a tap anywhere opens it.
-      let el;
-      if(link){
-        el = document.createElement('a');
-        el.href = link.href;
-        if(link.external){ el.target = '_blank'; el.rel = 'noopener noreferrer'; }
-        if(isClone) el.tabIndex = -1;
-      } else {
-        el = document.createElement(isClone ? 'span' : 'div');
-      }
-      el.className = 'marquee-item';
-      if(PARTNER_COLORS.indexOf(b.color) >= 0) el.dataset.color = b.color;
-      if(!isClone){
-        el.setAttribute('role','listitem');
-        if(!b.logo) el.setAttribute('aria-label', b.name + ' — ' + b.category);
-      } else {
-        el.setAttribute('aria-hidden','true');
-      }
-      el.innerHTML = itemInner;
-      group.appendChild(el);
-
-      const dot = document.createElement('span');
-      dot.className = 'marquee-dot';
-      dot.setAttribute('aria-hidden','true');
-      group.appendChild(dot);
-    });
-    return group;
-  }
-
-  rowEls.forEach((track, i) => {
-    if(!rows[i].length){ return; }
-    // Real group (announced to screen readers) + duplicate group (aria-hidden,
-    // used only so the CSS translateX(-50%) loop has no visible seam).
-    track.appendChild(buildGroup(rows[i], false));
-    track.appendChild(buildGroup(rows[i], true));
+    if(PARTNER_COLORS.includes(b.color)) item.dataset.color = b.color;
+    if(logo){
+      const image = document.createElement('img');
+      image.className = 'marquee-logo-img';
+      image.src = logo;
+      image.alt = b.name;
+      image.loading = 'lazy';
+      image.width = 140;
+      image.height = 30;
+      item.append(image);
+    } else {
+      const category = document.createElement('span');
+      category.className = 'marquee-cat';
+      category.textContent = PARTNER_CATEGORY_SHORT[b.category] || b.category || '';
+      const name = document.createElement('span');
+      name.className = 'marquee-logo-text';
+      name.textContent = b.name;
+      item.append(category, name);
+    }
+    row.append(item);
+    list.append(row);
   });
 }
-renderPartnersMarquee();
+renderPartners();
 
 /* ============================================================
    TOURIST MODE
