@@ -1,5 +1,8 @@
-name: Check website
-on: [push, pull_request]
+name: Check and deploy website
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -12,3 +15,49 @@ jobs:
         run: uv run --no-project --python 3.12 python scripts/check_release.py
       - name: Check delayed and offline published content
         run: node scripts/check-site-data.mjs
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    concurrency:
+      group: jaisalmervisit-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+      - name: Confirm this is the current main revision
+        id: revision
+        shell: bash
+        run: |
+          current_main=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [[ "$current_main" == "$GITHUB_SHA" ]]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "A newer main revision exists. Its workflow will publish it."
+          fi
+      - name: Export the committed website
+        if: steps.revision.outputs.current == 'true'
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/pages-release"
+          git archive "$GITHUB_SHA" public | tar -x -C "$RUNNER_TEMP/pages-release"
+      - name: Publish Cloudflare Pages
+        if: steps.revision.outputs.current == 'true'
+        id: pages
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.166.0'
+          command: >-
+            pages deploy ${{ runner.temp }}/pages-release/public
+            --project-name=jaisalmervisit --branch=main
+            --commit-hash=${{ github.sha }}
+      - name: Verify the published release
+        if: steps.revision.outputs.current == 'true'
+        env:
+          DEPLOYMENT_URL: ${{ steps.pages.outputs.deployment-url }}
+        shell: bash
+        run: |
+          uv run --no-project --python 3.12 python scripts/check_release.py --origin "$DEPLOYMENT_URL"
+          uv run --no-project --python 3.12 python scripts/check_release.py --origin https://jaisalmervisit.com
