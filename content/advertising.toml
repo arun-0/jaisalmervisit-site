@@ -1,0 +1,4 @@
+# Optional display ad unit IDs from the site's own AdSense account, in reading order.
+# Set two or three confirmed IDs after the owner approves the placements and consent setup.
+# Blank configuration produces ordinary article text without ad requests or reserved gaps.
+slots = []

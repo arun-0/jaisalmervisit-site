@@ -452,6 +452,7 @@ Object.keys(ITINERARIES).forEach(key=>{
   btn.className = 'trip-tab' + (key===activeTrip ? ' is-active' : '');
   btn.setAttribute('aria-pressed', String(key===activeTrip));
   btn.textContent = ITINERARIES[key].label;
+  btn.dataset.tripId = key;
   btn.addEventListener('click', ()=>{
     activeTrip = key;
     document.querySelectorAll('.trip-tab').forEach(b=>{ b.classList.remove('is-active'); b.setAttribute('aria-pressed','false'); });
@@ -2806,6 +2807,26 @@ const JMActivities = (function(){
   };
 })();
 function openActivityModal(id){ JMActivities.open(id); }
+
+// Guide pages link back to the corresponding planner tab or activity in the live directory.
+function followGuideLink(){
+  const [section, query] = location.hash.slice(1).split('?');
+  if(!query) return;
+  const params = new URLSearchParams(query);
+  if(section === 'plan'){
+    const button = Array.from(tripTabs.children).find(tab => tab.dataset.tripId === params.get('trip'));
+    if(button){ button.click(); document.getElementById('plan').scrollIntoView(); }
+  } else if(section === 'things-to-do'){
+    const id = params.get('activity');
+    if(ACTIVITIES.some(activity => activity.id === id)){
+      document.getElementById('things-to-do').scrollIntoView();
+      openActivityModal(id);
+    }
+  }
+}
+window.addEventListener('hashchange', followGuideLink);
+// Run after declarations used by the activity sheet have been initialized.
+queueMicrotask(followGuideLink);
 
 /* ============================================================
    SMART SEARCH
