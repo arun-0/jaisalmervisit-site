@@ -43,7 +43,7 @@ $ad_script
     <a class="guide-category" href="$section_url">$section_label</a>
     <h1>$title</h1>
     <p class="guide-intro">$description</p>
-    <a class="guide-action" href="$action_url">$action_label <span aria-hidden="true">↗</span></a>
+    <a class="guide-action" data-guide-action="primary" href="$action_url">$action_label <span aria-hidden="true">↗</span></a>
 $photo
     <div class="guide-copy">
       $body
@@ -53,5 +53,18 @@ $related_html
   </article>
 </main>
 <footer class="guide-footer"><div class="guide-bar"><a href="/">Jaisalmer Visit</a><a href="/privacy">Privacy policy</a><button type="button" data-cookie-settings>Cookie settings</button></div></footer>
+<script>
+document.addEventListener('click', function(event){
+  var link = event.target.closest('.guide-article a');
+  if(!link) return;
+  var destination = new URL(link.href, location.href);
+  if(destination.origin !== location.origin) return;
+  document.dispatchEvent(new CustomEvent('jm:analytics', {detail:{
+    event:'guide_action_click', guide_path:location.pathname,
+    destination_path:destination.pathname + destination.hash,
+    action:link.dataset.guideAction || (destination.hash ? 'directory' : 'related_guide')
+  }}));
+});
+</script>
 </body>
 </html>

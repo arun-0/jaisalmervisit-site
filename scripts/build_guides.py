@@ -119,20 +119,29 @@ def asset(kind, name, extension):
 
 
 def advertising():
-    slots = tomllib.loads((ROOT / "content/advertising.toml").read_text("utf-8"))["slots"]
+    config = tomllib.loads((ROOT / "content/advertising.toml").read_text("utf-8"))
+    slots = config["slots"]
+    auto_ads = config.get("auto_ads", False)
+    if not isinstance(auto_ads, bool):
+        raise ValueError("auto_ads must be true or false")
     if slots and (len(slots) not in (2, 3) or any(not re.fullmatch(r"\d{10}", s) for s in slots)):
         raise ValueError("Use two or three confirmed ten-digit AdSense display unit IDs")
     sellers = (PUBLIC / "ads.txt").read_text("utf-8")
     publisher = re.search(r"(?m)^google\.com,\s*(pub-\d+),\s*DIRECT\b", sellers)
     if not publisher:
         raise ValueError("Missing Google publisher in ads.txt")
-    return "ca-" + publisher[1], slots
+    return "ca-" + publisher[1], slots, auto_ads
 
 
-def place_ads(blocks, words, publisher, slots):
+def publisher_script(publisher):
+    return (f'<script async crossorigin="anonymous" '
+            f'src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={publisher}"></script>')
+
+
+def place_ads(blocks, words, publisher, slots, auto_ads=False):
     limit = 3 if words >= 1000 else 2 if words >= 600 else 0
     if not slots or not limit or len(blocks) < 3:
-        return "", blocks
+        return publisher_script(publisher) if auto_ads else "", blocks
     positions = [0, len(blocks) // 2, len(blocks)]
     merged = blocks.copy()
     for pos, slot in reversed(list(zip(positions, slots[:limit]))):
@@ -140,12 +149,10 @@ def place_ads(blocks, words, publisher, slots):
                       f'<ins class="adsbygoogle" data-ad-client="{publisher}" data-ad-slot="{slot}" '
                       'data-ad-format="auto" data-full-width-responsive="true"></ins>'
                       '<script>(window.adsbygoogle = window.adsbygoogle || []).push({});</script></aside>')
-    loader = (f'<script async crossorigin="anonymous" '
-              f'src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={publisher}"></script>')
-    return loader, merged
+    return publisher_script(publisher), merged
 
 
-def guide_html(guide, by_path, template, assets, publisher, slots):
+def guide_html(guide, by_path, template, assets, publisher, slots, auto_ads=False):
     meta = guide.meta
     section, anchor, schema_type = GROUPS[guide.group]
     canonical = ORIGIN + guide.path
@@ -188,7 +195,7 @@ def guide_html(guide, by_path, template, assets, publisher, slots):
     if "image" in meta:
         photo = (f'<img class="guide-photo" src="{escape(image)}" alt="{escape(share_alt)}" '
                  'width="960" height="540" decoding="async" fetchpriority="high">')
-    loader, blocks = place_ads(sections(guide.body), len(guide.body.split()), publisher, slots)
+    loader, blocks = place_ads(sections(guide.body), len(guide.body.split()), publisher, slots, auto_ads)
     schema = json.dumps({"@context": "https://schema.org", "@graph": graph},
                         ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
     return template.substitute(
@@ -229,11 +236,11 @@ def build(check):
     template = Template((ROOT / "templates/guide.html").read_text("utf-8"))
     assets = dict(site_css=asset("css", "site", "css"), guide_css=asset("css", "guides", "css"),
                   config_js=asset("js", "firebase-config", "js"), analytics_js=asset("js", "analytics", "js"))
-    publisher, slots = advertising()
+    publisher, slots, auto_ads = advertising()
     outputs = {}
     for guide in guides:
         out = PUBLIC / (guide.path[1:] + ".html")
-        outputs[out] = guide_html(guide, by_path, template, assets, publisher, slots)
+        outputs[out] = guide_html(guide, by_path, template, assets, publisher, slots, auto_ads)
     outputs[PUBLIC / "index.html"] = homepage(guides)
     outputs[PUBLIC / "sitemap.xml"] = sitemap(["/", "/privacy", *by_path])
 

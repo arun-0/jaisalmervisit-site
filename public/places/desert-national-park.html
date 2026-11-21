@@ -28,7 +28,7 @@ gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personali
 </script>
 
 <script defer src="/assets/js/firebase-config.46614717.js"></script>
-<script defer src="/assets/js/analytics.5bf9076c.js"></script>
+<script defer src="/assets/js/analytics.bd0ddf39.js"></script>
 </head>
 <body class="guide-page">
 <a class="skip-link" href="#guide">Skip to guide</a>
@@ -43,7 +43,7 @@ gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personali
     <a class="guide-category" href="/#explore">Place guides</a>
     <h1>Desert National Park</h1>
     <p class="guide-intro">One of the largest protected desert ecosystems in the country, home to the great Indian bustard.</p>
-    <a class="guide-action" href="/#map/dnp">Open the tourist map <span aria-hidden="true">↗</span></a>
+    <a class="guide-action" data-guide-action="primary" href="/#map/dnp">Open the tourist map <span aria-hidden="true">↗</span></a>
 <img class="guide-photo" src="https://firebasestorage.googleapis.com/v0/b/visitjaisalmer-e3085.firebasestorage.app/o/images%2Fplaces%2Frbd%2F1793239568197-desert-vegetation-dsc0942.avif?alt=media" alt="Desert vegetation in Desert National Park" width="960" height="540" decoding="async" fetchpriority="high">
     <div class="guide-copy">
       <section><h2>What makes it worth visiting</h2>
@@ -58,10 +58,23 @@ gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personali
 <section><h2>Visitor tips</h2>
 <p>Wildlife sightings, especially the bustard, are not guaranteed — go with realistic expectations and a good guide.</p></section>
 
-<section><h2>Plan the rest of your visit</h2><ul><li><a href="/places/sam-sand-dunes">Sam Sand Dunes</a></li><li><a href="/places/khuri">Khuri</a></li></ul></section>
+<section><h2>Plan the rest of your visit</h2><ul><li><a href="/places/sam-sand-dunes">Sam Sand Dunes, Jaisalmer: safaris, sunset and camps</a></li><li><a href="/places/khuri">Khuri, Jaisalmer: dunes, desert camps and safari planning</a></li></ul></section>
     </div>
   </article>
 </main>
 <footer class="guide-footer"><div class="guide-bar"><a href="/">Jaisalmer Visit</a><a href="/privacy">Privacy policy</a><button type="button" data-cookie-settings>Cookie settings</button></div></footer>
+<script>
+document.addEventListener('click', function(event){
+  var link = event.target.closest('.guide-article a');
+  if(!link) return;
+  var destination = new URL(link.href, location.href);
+  if(destination.origin !== location.origin) return;
+  document.dispatchEvent(new CustomEvent('jm:analytics', {detail:{
+    event:'guide_action_click', guide_path:location.pathname,
+    destination_path:destination.pathname + destination.hash,
+    action:link.dataset.guideAction || (destination.hash ? 'directory' : 'related_guide')
+  }}));
+});
+</script>
 </body>
 </html>

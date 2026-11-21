@@ -24,22 +24,23 @@
 
   var loaded = false;
   function load(){
-    if(loaded || !ID || (LOCAL && !DEBUG)) return;
-    loaded = true;
+    if(!ID || (LOCAL && !DEBUG)) return;
     gtag('consent', 'update', {analytics_storage:'granted'});   // ads stay denied: no ad personalisation
+    if(loaded) return;
+    loaded = true;
     var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ID);
     document.head.appendChild(s);
     gtag('js', new Date());
     gtag('config', ID, DEBUG ? {debug_mode:true} : {});
   }
   function forward(e){
-    if(!loaded || !e.detail || !e.detail.event) return;
+    if(!loaded || read() !== 'granted' || !e.detail || !e.detail.event) return;
     var d = e.detail, name = String(d.event).replace(/[^A-Za-z0-9_]/g, '_').slice(0, 40), p = {};
     if(SKIP[name]) return;
     Object.keys(d).forEach(function(k){
       var v = d[k]; if(k === 'event' || v == null || v === '') return;
       if(typeof v === 'string') v = v.slice(0, 100); else if(typeof v !== 'number' && typeof v !== 'boolean') return;
-      if(Object.keys(p).length < 20) p[k.replace(/[^A-Za-z0-9_]/g, '_').slice(0, 40)] = v;
+      if(Object.keys(p).length < 20) p[(k === 'source' ? 'interaction_source' : k).replace(/[^A-Za-z0-9_]/g, '_').slice(0, 40)] = v;
     });
     gtag('event', name, p);
   }
