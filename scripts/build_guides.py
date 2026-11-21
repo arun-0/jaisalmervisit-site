@@ -13,7 +13,11 @@ from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
-ORIGIN = "https://jaisalmervisit.com"
+HOME_CANONICAL = re.search(r'<link rel="canonical" href="(https://[^/"]+)/">',
+                           (PUBLIC / "index.html").read_text("utf-8"))
+if HOME_CANONICAL is None:
+    raise ValueError("The homepage needs an absolute HTTPS canonical URL")
+ORIGIN = HOME_CANONICAL[1]
 GROUPS = {
     "places": ("Place guides", "explore", "TouristAttraction"),
     "itineraries": ("Itineraries", "plan", "TouristTrip"),
