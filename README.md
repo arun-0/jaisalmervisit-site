@@ -68,7 +68,7 @@ database yet show the website's built-in content and are copied in (as published
 their original order. Each script asks `VJData.get('ATTRACTIONS', [...built-in...])` and gets the
 published data converted to the shape it already uses, or its built-in data when nothing is published.
 
-- Waits at most **1.5 s** for Firestore; after that it uses the copy cached in this tab
+- Waits at most **8 s** for Firestore and cancels an unresponsive request; after that it uses the copy cached in this tab
   (`sessionStorage`), or the built-in data. The site never renders blank.
 - Locally the pages use the emulators. Add `?prod-data` to a local URL to read the live database.
 - Forms: **Add Your Service** → `serviceSubmissions` (status `pending`, honeypot + 1 per minute

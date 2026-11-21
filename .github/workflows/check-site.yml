@@ -10,3 +10,5 @@ jobs:
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
       - name: Check generated HTML, sitemap and assets
         run: uv run --no-project --python 3.12 python scripts/check_release.py
+      - name: Check delayed and offline published content
+        run: node scripts/check-site-data.mjs
