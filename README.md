@@ -12,6 +12,8 @@ Mobile travel guide and local directory for jaisalmervisit.com. Cloudflare Pages
 | `scripts/` | Maintenance scripts (see below) |
 | `originals/` | The approved single-file designs the project was built from — reference only, not deployed |
 
+Business purpose, current work, approvals and owner dashboard live in the sibling [project entry](../business/dir-structure.md) and [TODO](../business/TODO.md) ([GitHub entry](https://github.com/arun-0/jaisalmervisit-business/blob/main/dir-structure.md)). This README owns technical operation rather than duplicating that business state.
+
 ## Build and preview the guide
 
 Open Git Bash in the site checkout. The static build uses the Python standard library (3.11+) through uv. The Node tools below use the existing fnm installation.
