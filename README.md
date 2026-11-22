@@ -171,7 +171,7 @@ GitHub Actions uses the repository secret `CLOUDFLARE_API_TOKEN` and repository 
 
 On this Windows PC the local project Wrangler sign-in is under `%LOCALAPPDATA%/JaisalmerVisit/Cloudflare`. The local script selects it when present. Another machine can use its own authorised Wrangler session.
 
-Firebase Hosting at `https://visitjaisalmer-e3085.web.app` is the original static fallback. The release does not call Firebase deploy. Firestore and Storage rules are administered separately. See the private business repository for the custom-domain record history and rollback procedure.
+Firebase Hosting at `https://visitjaisalmer-e3085.web.app` is the original static fallback. The release does not call Firebase deploy. Firestore and Storage rules are administered separately. See the public business repository for the custom-domain record history and rollback procedure.
 
 ## Map road routes (built-in directions)
 
